@@ -1,0 +1,203 @@
+@page "/workoutlogs/edit/{Id:int}"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Edit Workout Log</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Edit Workout Log</h1>
+    <div>
+        @if (log?.EndTime == null)
+        {
+            <button type="button" class="btn btn-success" @onclick="CompleteWorkout">Complete Workout</button>
+        }
+        else
+        {
+            <span class="badge bg-success p-2">Completed</span>
+        }
+    </div>
+</div>
+
+@if (log == null || workouts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="log" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Workout</label>
+                <InputSelect class="form-control" @bind-Value="log.WorkoutId">
+                    <option value="">-- Select Workout --</option>
+                    @foreach (var workout in workouts)
+                    {
+                        <option value="@workout.Id">@workout.Name</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Start Time</label>
+                <InputDate class="form-control" @bind-Value="log.StartTime" />
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Mesocycle (Optional)</label>
+            <div class="row">
+                <div class="col-md-6">
+                    <InputSelect class="form-control" @bind-Value="selectedMesocycleId">
+                        <option value="">-- No Mesocycle --</option>
+                        @foreach (var mesocycle in mesocycles)
+                        {
+                            <option value="@mesocycle.Id">@mesocycle.Name @(mesocycle.IsActive ? "(Active)" : "")</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-6">
+                    @if (selectedMesocycleId.HasValue)
+                    {
+                        <InputSelect class="form-control" @bind-Value="log.MesocycleWeek">
+                            <option value="">-- Select Week --</option>
+                            @for (int i = 1; i <= selectedMesocycle?.NumberOfWeeks; i++)
+                            {
+                                <option value="@i">Week @i @(i == selectedMesocycle?.NumberOfWeeks && selectedMesocycle?.IncludeDeloadWeek == true ? "(Deload)" : "")</option>
+                            }
+                        </InputSelect>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <InputTextArea class="form-control" @bind-Value="log.Notes" rows="3" />
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary ms-2" href="/workoutlogs">Cancel</a>
+    </EditForm>
+    
+    <hr />
+    
+    <h3>Exercise Sets</h3>
+    
+    @if (!log.ExerciseSets.Any())
+    {
+        <div class="alert alert-info">
+            No exercise sets recorded yet. Add some below.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Exercise</th>
+                        <th>Set</th>
+                        <th>Reps</th>
+                        <th>Weight (kg)</th>
+                        <th>Duration</th>
+                        <th>Notes</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var exerciseGroup in log.ExerciseSets.GroupBy(es => es.ExerciseId).OrderBy(g => g.Min(es => es.Id)))
+                    {
+                        var exercise = exercises.FirstOrDefault(e => e.Id == exerciseGroup.Key);
+                        var sets = exerciseGroup.OrderBy(es => es.SetNumber).ToList();
+                        
+                        <tr class="table-light">
+                            <td colspan="7">
+                                <strong>@exercise?.Name</strong>
+                            </td>
+                        </tr>
+                        
+                        @foreach (var set in sets)
+                        {
+                            <tr>
+                                <td></td>
+                                <td>@set.SetNumber</td>
+                                <td>@set.Reps</td>
+                                <td>@set.WeightInKg</td>
+                                <td>@(set.Duration?.ToString(@"mm\:ss") ?? "-")</td>
+                                <td>@set.Notes</td>
+                                <td>
+                                    <a href="/exercisesets/edit/@set.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a href="/exercisesets/delete/@set.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    
+    <div class="mb-4">
+        <a href="/exercisesets/create?workoutLogId=@log.Id" class="btn btn-primary">Add Exercise Set</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private WorkoutLog? log;
+    private List<Workout>? workouts;
+    private List<Mesocycle> mesocycles = new();
+    private List<Exercise> exercises = new();
+    private int? selectedMesocycleId;
+    private Mesocycle? selectedMesocycle => selectedMesocycleId.HasValue 
+                                          ? mesocycles.FirstOrDefault(m => m.Id == selectedMesocycleId)
+                                          : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        log = await Db.WorkoutLogs
+            .Include(wl => wl.ExerciseSets)
+            .FirstOrDefaultAsync(wl => wl.Id == Id);
+            
+        if (log == null)
+        {
+            Nav.NavigateTo("/workoutlogs");
+            return;
+        }
+        
+        workouts = await Db.Workouts.OrderBy(w => w.Name).ToListAsync();
+        mesocycles = await Db.Mesocycles
+            .OrderByDescending(m => m.IsActive)
+            .ThenByDescending(m => m.StartDate)
+            .ToListAsync();
+            
+        exercises = await Db.Exercises.ToListAsync();
+        
+        selectedMesocycleId = log.MesocycleId;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        log!.MesocycleId = selectedMesocycleId;
+        Db.Update(log);
+        await Db.SaveChangesAsync();
+        Nav.NavigateTo("/workoutlogs");
+    }
+    
+    private async Task CompleteWorkout()
+    {
+        if (log != null && log.EndTime == null)
+        {
+            log.EndTime = DateTime.Now;
+            Db.Update(log);
+            await Db.SaveChangesAsync();
+            await OnInitializedAsync();
+        }
+    }
+}

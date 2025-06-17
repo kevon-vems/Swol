@@ -1,0 +1,34 @@
+@page "/workouts/create"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Navigation
+@using Swol.Data.Models
+
+<PageTitle>Add Workout</PageTitle>
+
+<h1>Add Workout</h1>
+
+<EditForm Model="workout" OnValidSubmit="HandleValidSubmit" FormName="WorkoutCreateForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <InputText class="form-control" @bind-Value="workout.Name" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <InputTextArea class="form-control" @bind-Value="workout.Description" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a class="btn btn-secondary ms-2" href="/workouts">Cancel</a>
+</EditForm>
+
+@code {
+    private Workout workout = new();
+
+    private async Task HandleValidSubmit()
+    {
+        Db.Workouts.Add(workout);
+        await Db.SaveChangesAsync();
+        Navigation.NavigateTo("/workouts");
+    }
+}

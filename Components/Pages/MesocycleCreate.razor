@@ -1,0 +1,78 @@
+@page "/mesocycles/create"
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+
+<h1>Create Mesocycle</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <EditForm @onsubmit="HandleSubmit">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" id="name" class="form-control" @bind="mesocycle.Name" />
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" class="form-control" rows="3" @bind="mesocycle.Description"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="workout" class="form-label">Workout</label>
+                <select id="workout" class="form-control" @bind="mesocycle.WorkoutId">
+                    <option value="0">-- Select Workout --</option>
+                    @foreach (var workout in workouts)
+                    {
+                        <option value="@workout.Id">@workout.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" class="form-control" @bind="mesocycle.StartDate" />
+                </div>
+                <div class="col-md-6">
+                    <label for="weeks" class="form-label">Number of Weeks</label>
+                    <input type="number" id="weeks" class="form-control" min="1" max="52" @bind="mesocycle.NumberOfWeeks" />
+                </div>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="includeDeload" @bind="mesocycle.IncludeDeloadWeek" />
+                <label class="form-check" for="includeDeload">Include Deload Week</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Mesocycle</button>
+
+            <a class="btn btn-secondary ms-2" href="/mesocycles">Cancel</a>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    private Mesocycle mesocycle = new Mesocycle();
+    private List<Workout> workouts = new List<Workout>();
+    protected override async Task OnInitializedAsync()
+    {
+        workouts = await Db.Workouts.ToListAsync();
+    }
+    private async Task HandleSubmit()
+    {
+        if (mesocycle.WorkoutId == 0)
+        {
+            // Handle validation error for Workout selection
+            return;
+        }
+        mesocycle.IsActive = true; // Set active by default
+        // mesocycle.CurrentWeek = 1; // Start at week 1
+        // mesocycle.EndDate = mesocycle.StartDate.AddDays(mesocycle.NumberOfWeeks * 7);
+        Db.Mesocycles.Add(mesocycle);
+        await Db.SaveChangesAsync();
+        Nav.NavigateTo("/mesocycles");
+    }
+}

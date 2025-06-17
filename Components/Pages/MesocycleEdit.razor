@@ -1,0 +1,68 @@
+@page "/mesocycles/edit/{Id:int}"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Edit Mesocycle</PageTitle>
+
+<h1>Edit Mesocycle</h1>
+
+@if (mesocycle == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8">
+            <EditForm Model="@mesocycle" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <InputText @bind-Value="mesocycle.Name" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <InputTextArea @bind-Value="mesocycle.Description" class="form-control" rows="3" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Workout</label>
+                    <InputSelect @bind-Value="mesocycle.WorkoutId" class="form-control">
+                        <option value="0">-- Select Workout --</option>
+                        @foreach (var workout in workouts)
+                        {
+                            <option value="@workout.Id">@workout.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Mesocycle? mesocycle;
+    private List<Workout> workouts = new List<Workout>();
+    protected override async Task OnInitializedAsync()
+    {
+        mesocycle = await Db.Mesocycles
+            .Include(m => m.Workout)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+        workouts = await Db.Workouts.ToListAsync();
+    }
+    private async Task HandleValidSubmit()
+    {
+        if (mesocycle != null)
+        {
+            Db.Mesocycles.Update(mesocycle);
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo("/mesocycles");
+        }
+    }
+}

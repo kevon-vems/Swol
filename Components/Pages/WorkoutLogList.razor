@@ -1,0 +1,82 @@
+@page "/workoutlogs"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Workout Logs</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Workout Logs</h1>
+    <a class="btn btn-primary" href="/workoutlogs/create">Add Workout Log</a>
+</div>
+
+@if (logs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Workout</th>
+                    <th>Mesocycle</th>
+                    <th>Duration</th>
+                    <th>Sets</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in logs)
+                {
+                    <tr>
+                        <td>@log.StartTime.ToShortDateString()</td>
+                        <td>@log.Workout?.Name</td>
+                        <td>
+                            @if (log.Mesocycle != null)
+                            {
+                                <span>@log.Mesocycle.Name - Week @log.MesocycleWeek</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (log.EndTime.HasValue)
+                            {
+                                <span>@((int)(log.EndTime.Value - log.StartTime).TotalMinutes) min</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">In progress</span>
+                            }
+                        </td>
+                        <td>@log.ExerciseSets.Count</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-secondary" href="/workoutlogs/edit/@log.Id">Edit</a>
+                            <a class="btn btn-sm btn-outline-danger" href="/workoutlogs/delete/@log.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<WorkoutLog>? logs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        logs = await Db.WorkoutLogs
+            .Include(wl => wl.Workout)
+            .Include(wl => wl.Mesocycle)
+            .Include(wl => wl.ExerciseSets)
+            .OrderByDescending(wl => wl.StartTime)
+            .ToListAsync();
+    }
+}

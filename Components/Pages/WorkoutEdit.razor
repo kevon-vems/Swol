@@ -1,0 +1,54 @@
+@page "/workouts/edit/{Id:int}"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Navigation
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Edit Workout</PageTitle>
+
+<h1>Edit Workout</h1>
+
+@if (workout == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="workout" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <InputText class="form-control" @bind-Value="workout.Name" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <InputTextArea class="form-control" @bind-Value="workout.Description" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary ms-2" href="/workouts">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Workout? workout;
+
+    protected override async Task OnInitializedAsync()
+    {
+        workout = await Db.Workouts.FindAsync(Id);
+        if (workout == null)
+        {
+            Navigation.NavigateTo("/workouts");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Db.Update(workout!);
+        await Db.SaveChangesAsync();
+        Navigation.NavigateTo("/workouts");
+    }
+}

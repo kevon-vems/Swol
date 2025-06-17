@@ -1,0 +1,184 @@
+﻿@page "/"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Workout Dashboard</h1>
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (activeMesocycle == null)
+    {
+        <div class="alert alert-info">
+            <h4>No Active Mesocycle</h4>
+            <p>You don't have an active mesocycle. Start a new training cycle to track your progress.</p>
+            <a href="/mesocycles/create" class="btn btn-primary">Create Mesocycle</a>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="m-0">Active Mesocycle: @activeMesocycle.Name</h3>
+                <a href="/mesocycles/edit/@activeMesocycle.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Workout:</strong> @activeMesocycle.Workout?.Name</p>
+                        <p><strong>Description:</strong> @activeMesocycle.Description</p>
+                        <p>
+                            <strong>Period:</strong> @activeMesocycle.StartDate.ToShortDateString() - @activeMesocycle.EndDate.ToShortDateString()
+                            (@((activeMesocycle.EndDate - DateTime.Today).Days) days remaining)
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar @(activeMesocycle.IsDeloadWeek ? "bg-warning" : "bg-primary")" 
+                                 role="progressbar" 
+                                 style="width: @(100 * activeMesocycle.CurrentWeek / activeMesocycle.NumberOfWeeks)%;"
+                                 aria-valuenow="@activeMesocycle.CurrentWeek" 
+                                 aria-valuemin="1" 
+                                 aria-valuemax="@activeMesocycle.NumberOfWeeks">
+                                Week @activeMesocycle.CurrentWeek of @activeMesocycle.NumberOfWeeks
+                                @if (activeMesocycle.IsDeloadWeek)
+                                {
+                                    <span> (Deload Week)</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            @if (todaysWorkoutLog != null)
+                            {
+                                <div class="alert alert-success">
+                                    <h5>Today's Workout</h5>
+                                    <p>Started at: @todaysWorkoutLog.StartTime.ToShortTimeString()</p>
+                                    <a href="/workoutlogs/edit/@todaysWorkoutLog.Id" class="btn btn-primary">Continue Workout</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <a href="#" @onclick="StartTodaysWorkout" @onclick:preventDefault class="btn btn-lg btn-success w-100">
+                                    Start Today's Workout
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (recentWorkoutLogs.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h4>Recent Workouts</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Week</th>
+                                <th>Duration</th>
+                                <th>Sets</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in recentWorkoutLogs)
+                            {
+                                <tr>
+                                    <td>@log.StartTime.ToShortDateString()</td>
+                                    <td>Week @log.MesocycleWeek</td>
+                                    <td>
+                                        @if (log.EndTime.HasValue)
+                                        {
+                                            <span>@((int)(log.EndTime.Value - log.StartTime).TotalMinutes) min</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">In progress</span>
+                                        }
+                                    </td>
+                                    <td>@log.ExerciseSets.Count</td>
+                                    <td>
+                                        <a href="/workoutlogs/edit/@log.Id" class="btn btn-sm btn-outline-secondary">View</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="text-end">
+                        <a href="/workoutlogs" class="btn btn-outline-primary">View All Workouts</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}
+
+@code {
+    private bool isLoading = true;
+    private Mesocycle? activeMesocycle;
+    private WorkoutLog? todaysWorkoutLog;
+    private List<WorkoutLog> recentWorkoutLogs = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        activeMesocycle = await Db.Mesocycles
+            .Include(m => m.Workout)
+            .FirstOrDefaultAsync(m => m.IsActive);
+            
+        if (activeMesocycle != null)
+        {
+            // Get today's workout log if it exists
+            todaysWorkoutLog = await Db.WorkoutLogs
+                .Where(wl => wl.MesocycleId == activeMesocycle.Id && 
+                       wl.StartTime.Date == DateTime.Today)
+                .FirstOrDefaultAsync();
+                
+            // Get recent workout logs for this mesocycle
+            recentWorkoutLogs = await Db.WorkoutLogs
+                .Include(wl => wl.ExerciseSets)
+                .Where(wl => wl.MesocycleId == activeMesocycle.Id)
+                .OrderByDescending(wl => wl.StartTime)
+                .Take(5)
+                .ToListAsync();
+        }
+        
+        isLoading = false;
+    }
+    
+    private async Task StartTodaysWorkout()
+    {
+        if (activeMesocycle == null || activeMesocycle.Workout == null)
+            return;
+            
+        // Create a new workout log for today
+        var workoutLog = new WorkoutLog
+        {
+            WorkoutId = activeMesocycle.WorkoutId,
+            MesocycleId = activeMesocycle.Id,
+            MesocycleWeek = activeMesocycle.CurrentWeek,
+            StartTime = DateTime.Now,
+            Notes = $"{activeMesocycle.Name} - Week {activeMesocycle.CurrentWeek}" + 
+                    (activeMesocycle.IsDeloadWeek ? " (Deload Week)" : "")
+        };
+        
+        Db.WorkoutLogs.Add(workoutLog);
+        await Db.SaveChangesAsync();
+        
+        // Navigate to the workout log edit page
+        Nav.NavigateTo($"/workoutlogs/edit/{workoutLog.Id}");
+    }
+}
+

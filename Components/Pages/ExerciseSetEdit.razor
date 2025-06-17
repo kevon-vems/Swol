@@ -1,0 +1,78 @@
+@page "/exercisesets/edit/{Id:int}"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Navigation
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Edit Exercise Set</PageTitle>
+
+<h1>Edit Exercise Set</h1>
+
+@if (set == null || workoutLogs == null || exercises == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="set" OnValidSubmit="HandleValidSubmit" FormName="ExerciseSetEditForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">Workout Log</label>
+            <InputSelect class="form-control" @bind-Value="set.WorkoutLogId">
+                <option value="">-- Select Workout Log --</option>
+                @foreach (var log in workoutLogs)
+                {
+                    <option value="@log.Id">@log.StartTime.ToShortDateString()</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Exercise</label>
+            <InputSelect class="form-control" @bind-Value="set.ExerciseId">
+                <option value="">-- Select Exercise --</option>
+                @foreach (var exercise in exercises)
+                {
+                    <option value="@exercise.Id">@exercise.Name</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Reps</label>
+            <InputNumber class="form-control" @bind-Value="set.Reps" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Weight</label>
+            <InputNumber class="form-control" @bind-Value="set.WeightInKg" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary ms-2" href="/exercisesets">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ExerciseSet? set;
+    private List<WorkoutLog>? workoutLogs;
+    private List<Exercise>? exercises;
+
+    protected override async Task OnInitializedAsync()
+    {
+        set = await Db.ExerciseSets.FindAsync(Id);
+        workoutLogs = await Db.WorkoutLogs.ToListAsync();
+        exercises = await Db.Exercises.ToListAsync();
+        if (set == null)
+        {
+            Navigation.NavigateTo("/exercisesets");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Db.Update(set!);
+        await Db.SaveChangesAsync();
+        Navigation.NavigateTo("/exercisesets");
+    }
+}

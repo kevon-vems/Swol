@@ -1,0 +1,53 @@
+@page "/exercisesets"
+@inject Swol.Data.ApplicationDbContext Db
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Exercise Sets</PageTitle>
+
+<h1>Exercise Sets</h1>
+
+<a class="btn btn-primary mb-3" href="/exercisesets/create">Add Exercise Set</a>
+
+@if (sets == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Workout Log</th>
+                <th>Exercise</th>
+                <th>Reps</th>
+                <th>Weight</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var set in sets)
+            {
+                <tr>
+                    <td>@set.WorkoutLogId</td>
+                    <td>@set.Exercise?.Name</td>
+                    <td>@set.Reps</td>
+                    <td>@set.WeightInKg</td>
+                    <td>
+                        <a class="btn btn-sm btn-secondary" href="/exercisesets/edit/@set.Id">Edit</a>
+                        <a class="btn btn-sm btn-danger" href="/exercisesets/delete/@set.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ExerciseSet>? sets;
+
+    protected override async Task OnInitializedAsync()
+    {
+        sets = await Db.ExerciseSets.Include(es => es.Exercise).ToListAsync();
+    }
+}

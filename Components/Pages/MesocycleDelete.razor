@@ -1,0 +1,83 @@
+@page "/mesocycles/delete/{Id:int}"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Delete Mesocycle</PageTitle>
+
+<h1>Delete Mesocycle</h1>
+
+@if (mesocycle == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="alert alert-danger">
+        <h4>Are you sure you want to delete this mesocycle?</h4>
+        <p>This action cannot be undone.</p>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="m-0">@mesocycle.Name</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Workout:</strong> @mesocycle.Workout?.Name</p>
+            <p><strong>Period:</strong> @mesocycle.StartDate.ToShortDateString() - @mesocycle.EndDate.ToShortDateString()</p>
+            <p><strong>Week:</strong> @mesocycle.CurrentWeek of @mesocycle.NumberOfWeeks</p>
+            <p>@mesocycle.Description</p>
+            
+            @if (workoutLogs.Any())
+            {
+                <div class="alert alert-warning mt-3">
+                    <strong>Warning:</strong> This mesocycle has @workoutLogs.Count associated workout logs. 
+                    Deleting this mesocycle will remove the association with these logs, but the logs themselves will not be deleted.
+                </div>
+            }
+        </div>
+    </div>
+
+    <button @onclick="DeleteMesocycle" class="btn btn-danger">Delete</button>
+    <a href="/mesocycles" class="btn btn-secondary ms-2">Cancel</a>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Mesocycle? mesocycle;
+    private List<WorkoutLog> workoutLogs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        mesocycle = await Db.Mesocycles
+            .Include(m => m.Workout)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+            
+        if (mesocycle == null)
+        {
+            Nav.NavigateTo("/mesocycles");
+            return;
+        }
+        
+        workoutLogs = await Db.WorkoutLogs
+            .Where(wl => wl.MesocycleId == Id)
+            .ToListAsync();
+    }
+
+    private async Task DeleteMesocycle()
+    {
+        // Remove mesocycle associations from workout logs
+        foreach (var log in workoutLogs)
+        {
+            log.MesocycleId = null;
+            log.MesocycleWeek = null;
+        }
+        
+        Db.Mesocycles.Remove(mesocycle!);
+        await Db.SaveChangesAsync();
+        Nav.NavigateTo("/mesocycles");
+    }
+}

@@ -1,0 +1,153 @@
+@page "/exercises/edit/{Id:int}"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Navigation
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+
+<PageTitle>Edit Exercise</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Edit Exercise</h1>
+    <div>
+        <button type="submit" form="exerciseEditForm" class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary ms-2" href="/exercises">Cancel</a>
+    </div>
+</div>
+
+@if (exercise == null || muscleGroups == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm id="exerciseEditForm" Model="exercise" OnValidSubmit="HandleValidSubmit" FormName="ExerciseEditForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Name</label>
+                <InputText class="form-control" @bind-Value="exercise.Name" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Category</label>
+                <InputText class="form-control" @bind-Value="exercise.Category" />
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <InputTextArea class="form-control" @bind-Value="exercise.Description" rows="3" />
+        </div>
+
+        <label class="form-label">Muscle Groups</label>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="border p-3 mb-3">
+                    <h5>Available</h5>
+                    <hr/>
+                    <div style="height: 300px; overflow-y: auto;">
+                        @foreach (var mg in availableMuscleGroups)
+                        {
+                            <div class="d-grid mb-1">
+                                <button type="button" class="btn btn-outline-secondary text-start" @onclick="() => AddMuscleGroup(mg)">
+                                    @mg.Name <span class="float-end">&gt;</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="border p-3 mb-3 bg-light">
+                    <h5>Selected</h5>
+                    <hr/>
+                    <div style="height: 300px; overflow-y: auto;">
+                        @foreach (var mg in selectedMuscleGroups)
+                        {
+                            <div class="d-grid mb-1">
+                                <button type="button" class="btn btn-outline-secondary text-start" @onclick="() => RemoveMuscleGroup(mg)">
+                                    <span class="float-start">&lt;</span>&nbsp;&nbsp;@mg.Name
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Swol.Data.Models.Exercise? exercise;
+    private List<Swol.Data.Models.MuscleGroup> muscleGroups = new();
+    private List<Swol.Data.Models.MuscleGroup> selectedMuscleGroups = new();
+    private List<Swol.Data.Models.MuscleGroup> availableMuscleGroups = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        exercise = await Db.Exercises
+            .Include(e => e.ExerciseMuscleGroups)
+            .FirstOrDefaultAsync(e => e.Id == Id);
+            
+        muscleGroups = await Db.MuscleGroups.OrderBy(mg => mg.Name).ToListAsync();
+        
+        if (exercise == null)
+        {
+            Navigation.NavigateTo("/exercises");
+            return;
+        }
+
+        // Get the selected muscle group IDs
+        var selectedIds = exercise.ExerciseMuscleGroups.Select(emg => emg.MuscleGroupId).ToList();
+        
+        // Create the selected and available lists
+        selectedMuscleGroups = muscleGroups.Where(mg => selectedIds.Contains(mg.Id)).ToList();
+        availableMuscleGroups = muscleGroups.Where(mg => !selectedIds.Contains(mg.Id)).ToList();
+    }
+
+    private void AddMuscleGroup(Swol.Data.Models.MuscleGroup muscleGroup)
+    {
+        availableMuscleGroups.Remove(muscleGroup);
+        selectedMuscleGroups.Add(muscleGroup);
+        selectedMuscleGroups = selectedMuscleGroups.OrderBy(mg => mg.Name).ToList();
+        availableMuscleGroups = availableMuscleGroups.OrderBy(mg => mg.Name).ToList();
+        StateHasChanged();
+    }
+
+    private void RemoveMuscleGroup(Swol.Data.Models.MuscleGroup muscleGroup)
+    {
+        selectedMuscleGroups.Remove(muscleGroup);
+        availableMuscleGroups.Add(muscleGroup);
+        selectedMuscleGroups = selectedMuscleGroups.OrderBy(mg => mg.Name).ToList();
+        availableMuscleGroups = availableMuscleGroups.OrderBy(mg => mg.Name).ToList();
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Db.Update(exercise!);
+        
+        // Remove old associations
+        var oldEmgs = Db.ExerciseMuscleGroups.Where(emg => emg.ExerciseId == exercise!.Id).ToList();
+        Db.ExerciseMuscleGroups.RemoveRange(oldEmgs);
+        await Db.SaveChangesAsync(); // Persist removals first
+
+        // Add new associations
+        foreach (var mg in selectedMuscleGroups)
+        {
+            Db.ExerciseMuscleGroups.Add(new Swol.Data.Models.ExerciseMuscleGroup 
+            { 
+                ExerciseId = exercise!.Id, 
+                MuscleGroupId = mg.Id 
+            });
+        }
+        
+        await Db.SaveChangesAsync(); // Persist additions
+        Navigation.NavigateTo("/exercises");
+    }
+}

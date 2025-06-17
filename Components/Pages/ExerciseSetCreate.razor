@@ -1,0 +1,66 @@
+@page "/exercisesets/create"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.WebUtilities
+
+<PageTitle>Add Exercise Set</PageTitle>
+
+<h1>Add Exercise Set</h1>
+
+<EditForm Model="@set" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Workout Log</label>
+            <InputSelect class="form-control" @bind-Value="set.WorkoutLogId">
+                <option value="">-- Select Workout Log --</option>
+                @foreach (var log in workoutLogs)
+                {
+                    <option value="@log.Id">@log.StartTime.ToShortDateString() - @log.Workout?.Name</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Exercise</label>
+            <InputSelect class="form-control" @bind-Value="set.ExerciseId">
+                <option value="">-- Select Exercise --</option>
+                @foreach (var exercise in exercises)
+                {
+                    <option value="@exercise.Id">@exercise.Name</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Set Number</label>
+            <InputNumber class="form-control" @bind-Value="set.SetNumber" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Reps</label>
+            <InputNumber class="form-control" @bind-Value="set.Reps" />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private ExerciseSet set = new ExerciseSet();
+    private List<WorkoutLog> workoutLogs = new List<WorkoutLog>();
+    private List<Exercise> exercises = new List<Exercise>();
+    protected override async Task OnInitializedAsync()
+    {
+        workoutLogs = await Db.WorkoutLogs.Include(wl => wl.Workout).ToListAsync();
+        exercises = await Db.Exercises.ToListAsync();
+    }
+    private async Task HandleValidSubmit()
+    {
+        Db.ExerciseSets.Add(set);
+        await Db.SaveChangesAsync();
+        Nav.NavigateTo("/exercisesets");
+    }
+}

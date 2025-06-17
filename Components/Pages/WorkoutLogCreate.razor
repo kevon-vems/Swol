@@ -1,0 +1,86 @@
+@page "/workoutlogs/create"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Add Workout Log</PageTitle>
+
+<h1>Add Workout Log</h1>
+
+<EditForm Model="@log" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Workout</label>
+            <InputSelect class="form-control" @bind-Value="log.WorkoutId">
+                <option value="">-- Select Workout --</option>
+                @foreach (var workout in workouts)
+                {
+                    <option value="@workout.Id">@workout.Name</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Start Time</label>
+            <InputDate class="form-control" @bind-Value="log.StartTime" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mesocycle (Optional)</label>
+        <div class="row">
+            <div class="col-md-6">
+                <InputSelect class="form-control" @bind-Value="selectedMesocycleId">
+                    <option value="">-- No Mesocycle --</option>
+                    @foreach (var mesocycle in mesocycles)
+                    {
+                        <option value="@mesocycle.Id">@mesocycle.Name @(mesocycle.IsActive ? "(Active)" : "")</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="col-md-6">
+                @if (selectedMesocycleId.HasValue)
+                {
+                    <InputSelect class="form-control" @bind-Value="log.MesocycleWeek">
+                        <option value="">-- Select Week --</option>
+                        @for (int i = 1; i <= selectedMesocycle?.NumberOfWeeks; i++)
+                        {
+                            <option value="@i">Week @i @(i == selectedMesocycle?.NumberOfWeeks && selectedMesocycle?.IncludeDeloadWeek == true ? "(Deload)" : "")</option>
+                        }
+                    </InputSelect>
+                }
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private WorkoutLog log = new WorkoutLog();
+    private List<Workout> workouts = new List<Workout>();
+    private List<Mesocycle> mesocycles = new List<Mesocycle>();
+    private int? selectedMesocycleId;
+    private Mesocycle? selectedMesocycle;
+    protected override async Task OnInitializedAsync()
+    {
+        workouts = await Db.Workouts.ToListAsync();
+        mesocycles = await Db.Mesocycles.Where(m => m.IsActive).ToListAsync();
+    }
+    private async Task HandleValidSubmit()
+    {
+        if (selectedMesocycleId.HasValue)
+        {
+            log.MesocycleId = selectedMesocycleId.Value;
+        }
+        else
+        {
+            log.MesocycleId = null;
+        }
+        Db.WorkoutLogs.Add(log);
+        await Db.SaveChangesAsync();
+        Nav.NavigateTo("/workoutlogs");
+    }
+
+}

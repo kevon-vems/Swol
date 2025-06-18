@@ -48,7 +48,7 @@
                         <option value="">-- Select Week --</option>
                         @for (int i = 1; i <= selectedMesocycle?.NumberOfWeeks; i++)
                         {
-                            <option value="@i">Week @i @(i == selectedMesocycle?.NumberOfWeeks && selectedMesocycle?.IncludeDeloadWeek == true ? "(Deload)" : "")</option>
+                            <option value="@i">Week @i @(i == selectedMesocycle?.NumberOfWeeks ? "(Deload)" : "")</option>
                         }
                     </InputSelect>
                 }
@@ -63,11 +63,32 @@
     private List<Mesocycle> mesocycles = new List<Mesocycle>();
     private int? selectedMesocycleId;
     private Mesocycle? selectedMesocycle;
+
     protected override async Task OnInitializedAsync()
     {
         workouts = await Db.Workouts.ToListAsync();
         mesocycles = await Db.Mesocycles.Where(m => m.IsActive).ToListAsync();
     }
+
+    private int? _lastMesocycleId;
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (selectedMesocycleId != _lastMesocycleId)
+        {
+            if (selectedMesocycleId.HasValue)
+            {
+                selectedMesocycle = mesocycles.FirstOrDefault(m => m.Id == selectedMesocycleId.Value);
+            }
+            else
+            {
+                selectedMesocycle = null;
+            }
+            log.MesocycleWeek = null; // Reset week selection when mesocycle changes
+            _lastMesocycleId = selectedMesocycleId;
+        }
+    }
+
     private async Task HandleValidSubmit()
     {
         if (selectedMesocycleId.HasValue)
@@ -82,5 +103,4 @@
         await Db.SaveChangesAsync();
         Nav.NavigateTo("/workoutlogs");
     }
-
 }

@@ -7,6 +7,21 @@
 
 <h1>Add Workout</h1>
 
+<div class="alert alert-info">
+    <strong>What is a Workout?</strong><br />
+    A Workout in this application is a collection of exercises performed together as a session. Each Workout can include multiple exercises, their order, sets, reps, and weights. Workouts are designed to be repeated and tracked over time, and can be used as part of a larger training plan (Mesocycle).
+    <br /><br />
+    <strong>Example:</strong><br />
+    <em>Name:</em> Push Day<br />
+    <em>Description:</em> Upper body workout focused on chest, shoulders, and triceps.<br />
+    <em>Exercises:</em>
+    <ul>
+        <li>Barbell Bench Press: 4 sets x 8 reps @@ 60kg</li>
+        <li>Overhead Press: 3 sets x 10 reps @@ 35kg</li>
+        <li>Triceps Pushdown: 3 sets x 12 reps @@ 25kg</li>
+    </ul>
+</div>
+
 <EditForm Model="workout" OnValidSubmit="HandleValidSubmit" FormName="WorkoutCreateForm">
     <DataAnnotationsValidator />
     <ValidationSummary />

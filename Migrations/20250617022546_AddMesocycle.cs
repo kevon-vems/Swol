@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Swol.Migrations
 {
     /// <inheritdoc />
+    [Obsolete("This migration is now obsolete due to the removal of MesocycleWeek. Please remove the MesocycleWeek table and related code in a new migration.")]
     public partial class AddMesocycle : Migration
     {
         /// <inheritdoc />

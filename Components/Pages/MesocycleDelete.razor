@@ -24,9 +24,8 @@ else
             <h5 class="m-0">@mesocycle.Name</h5>
         </div>
         <div class="card-body">
-            <p><strong>Workout:</strong> @mesocycle.Workout?.Name</p>
-            <p><strong>Period:</strong> @mesocycle.StartDate.ToShortDateString() - @mesocycle.EndDate.ToShortDateString()</p>
-            <p><strong>Week:</strong> @mesocycle.CurrentWeek of @mesocycle.NumberOfWeeks</p>
+            <p><strong>Start:</strong> @mesocycle.StartDate.ToShortDateString()</p>
+            <p><strong>Weeks:</strong> @mesocycle.NumberOfWeeks</p>
             <p>@mesocycle.Description</p>
             
             @if (workoutLogs.Any())
@@ -53,7 +52,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         mesocycle = await Db.Mesocycles
-            .Include(m => m.Workout)
             .FirstOrDefaultAsync(m => m.Id == Id);
             
         if (mesocycle == null)

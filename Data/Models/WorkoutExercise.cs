@@ -1,5 +1,7 @@
 namespace Swol.Data.Models;
 
+// This file is now obsolete and can be deleted. The new structure uses WorkoutDay and WorkoutDayExercise for template definition.
+
 public class WorkoutExercise
 {
     public int Id { get; set; }

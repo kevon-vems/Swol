@@ -36,23 +36,9 @@ else
                         }
                     </div>
                     <div class="card-body">
-                        <p><strong>Workout:</strong> @mesocycle.Workout?.Name</p>
-                        <p><strong>Period:</strong> @mesocycle.StartDate.ToShortDateString() - @mesocycle.EndDate.ToShortDateString()</p>
-                        <p><strong>Week:</strong> @mesocycle.CurrentWeek of @mesocycle.NumberOfWeeks</p>
-                        
-                        <div class="progress mb-3" style="height: 20px;">
-                            <div class="progress-bar @(mesocycle.IsDeloadWeek ? "bg-warning" : "bg-primary")" 
-                                 role="progressbar" 
-                                 style="width: @(100 * mesocycle.CurrentWeek / mesocycle.NumberOfWeeks)%;"
-                                 aria-valuenow="@mesocycle.CurrentWeek" 
-                                 aria-valuemin="1" 
-                                 aria-valuemax="@mesocycle.NumberOfWeeks">
-                                Week @mesocycle.CurrentWeek
-                            </div>
-                        </div>
-                        
+                        <p><strong>Start:</strong> @mesocycle.StartDate.ToShortDateString()</p>
+                        <p><strong>Weeks:</strong> @mesocycle.NumberOfWeeks</p>
                         <p>@mesocycle.Description</p>
-                        
                         @if (mesocycle.WorkoutLogs.Any())
                         {
                             <p><strong>Completed Workouts:</strong> @mesocycle.WorkoutLogs.Count(wl => wl.EndTime.HasValue)</p>
@@ -78,7 +64,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         mesocycles = await Db.Mesocycles
-            .Include(m => m.Workout)
             .Include(m => m.WorkoutLogs)
             .OrderByDescending(m => m.IsActive)
             .ThenByDescending(m => m.StartDate)
@@ -101,7 +86,6 @@ else
         {
             mesocycle.IsActive = true;
             await Db.SaveChangesAsync();
-            
             // Refresh data
             await OnInitializedAsync();
         }

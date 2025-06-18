@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Swol.Data;
 
@@ -11,9 +12,11 @@ using Swol.Data;
 namespace Swol.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617195932_WorkoutTemplateRefactor")]
+    partial class WorkoutTemplateRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -655,6 +658,9 @@ namespace Swol.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IncludeDeloadWeek")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -684,18 +690,15 @@ namespace Swol.Migrations
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.Property<int>("MesocycleId")
+                    b.Property<int>("MesocycleWeekId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("WeekNumber")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("MesocycleId");
+                    b.HasIndex("MesocycleWeekId");
 
                     b.ToTable("MesocycleDays");
                 });
@@ -733,6 +736,27 @@ namespace Swol.Migrations
                     b.HasIndex("MesocycleDayId");
 
                     b.ToTable("MesocycleDayExercises");
+                });
+
+            modelBuilder.Entity("Swol.Data.Models.MesocycleWeek", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MesocycleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WeekNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MesocycleId");
+
+                    b.ToTable("MesocycleWeeks");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.MuscleGroup", b =>
@@ -1031,13 +1055,13 @@ namespace Swol.Migrations
 
             modelBuilder.Entity("Swol.Data.Models.MesocycleDay", b =>
                 {
-                    b.HasOne("Swol.Data.Models.Mesocycle", "Mesocycle")
+                    b.HasOne("Swol.Data.Models.MesocycleWeek", "MesocycleWeek")
                         .WithMany("Days")
-                        .HasForeignKey("MesocycleId")
+                        .HasForeignKey("MesocycleWeekId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Mesocycle");
+                    b.Navigation("MesocycleWeek");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.MesocycleDayExercise", b =>
@@ -1057,6 +1081,17 @@ namespace Swol.Migrations
                     b.Navigation("Exercise");
 
                     b.Navigation("MesocycleDay");
+                });
+
+            modelBuilder.Entity("Swol.Data.Models.MesocycleWeek", b =>
+                {
+                    b.HasOne("Swol.Data.Models.Mesocycle", "Mesocycle")
+                        .WithMany("Weeks")
+                        .HasForeignKey("MesocycleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mesocycle");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.WorkoutDay", b =>
@@ -1113,7 +1148,7 @@ namespace Swol.Migrations
 
             modelBuilder.Entity("Swol.Data.Models.Mesocycle", b =>
                 {
-                    b.Navigation("Days");
+                    b.Navigation("Weeks");
 
                     b.Navigation("WorkoutLogs");
                 });
@@ -1121,6 +1156,11 @@ namespace Swol.Migrations
             modelBuilder.Entity("Swol.Data.Models.MesocycleDay", b =>
                 {
                     b.Navigation("Exercises");
+                });
+
+            modelBuilder.Entity("Swol.Data.Models.MesocycleWeek", b =>
+                {
+                    b.Navigation("Days");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.Workout", b =>

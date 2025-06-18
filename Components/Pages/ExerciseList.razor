@@ -18,7 +18,6 @@ else
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Category</th>
                 <th>Muscle Groups</th>
                 <th></th>
             </tr>
@@ -28,7 +27,6 @@ else
             {
                 <tr>
                     <td>@exercise.Name</td>
-                    <td>@exercise.Category</td>
                     <td>
                         @string.Join(", ", exercise.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name))
                     </td>

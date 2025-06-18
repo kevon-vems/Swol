@@ -1,147 +1,122 @@
 @page "/mesocycles/create"
 @using Swol.Data.Models
 @using Microsoft.EntityFrameworkCore
+@using Swol.Enums
 
-<h1>Create Mesocycle</h1>
+<button type="submit" form="mesocycleForm" class="btn btn-primary">Create Mesocycle</button>
 
-<div class="row">
-    <div class="col-md-8">
-        <EditForm Model="mesocycle" OnValidSubmit="HandleSubmit">
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" id="name" class="form-control" @bind="mesocycle.Name" />
-            </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" class="form-control" rows="3" @bind="mesocycle.Description"></textarea>
-            </div>
+<div class="row pt-2">
+    <div class="col-12">
+        <EditForm Model="mesocycle" OnValidSubmit="HandleSubmit" id="mesocycleForm">
             <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" class="form-control" @bind="mesocycle.StartDate" />
-                </div>
-                <div class="col-md-6">
-                    <label for="weeks" class="form-label">Number of Weeks</label>
-                    <input type="number" id="weeks" class="form-control" min="1" max="52" @bind="mesocycle.NumberOfWeeks" />
-                </div>
-            </div>
-            <hr />
-            <h4>Days</h4>
-            <div class="mb-3">
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-2">
-                        <label class="form-label">Week #</label>
-                        <input type="number" class="form-control" min="1" max="@mesocycle.NumberOfWeeks" @bind="newDay.WeekNumber" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Day of Week</label>
-                        <InputSelect class="form-control" @bind-Value="newDay.DayOfWeek">
-                            @foreach (var day in Enum.GetValues<DayOfWeek>())
-                            {
-                                <option value="@day">@day</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Name (optional)</label>
-                        <input type="text" class="form-control" @bind="newDay.Name" />
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-success" @onclick="AddDay">Add Day</button>
-                    </div>
-                </div>
-            </div>
-            <div class="mb-3">
-                @if (mesocycle.Days.Any())
-                {
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Week</th>
-                                <th>Day of Week</th>
-                                <th>Name</th>
-                                <th>Exercises</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var day in mesocycle.Days.OrderBy(d => d.WeekNumber).ThenBy(d => d.DayOfWeek))
-                            {
-                                <tr class="@(selectedDay == day ? "table-primary" : "")">
-                                    <td>@day.WeekNumber</td>
-                                    <td>@day.DayOfWeek</td>
-                                    <td>@day.Name</td>
-                                    <td>
-                                        @if (day.Exercises.Any())
-                                        {
-                                            <ul class="mb-0">
-                                                @foreach (var ex in day.Exercises.OrderBy(e => e.OrderInDay))
-                                                {
-                                                    <li>
-                                                        @ex.Exercise?.Name (Sets: @ex.Sets, Reps: @ex.RepsPerSet, Weight: @ex.WeightInKg)
-                                                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" @onclick="() => RemoveExerciseFromDay(day, ex)">Remove</button>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">No exercises</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => SelectDay(day)">Edit Exercises</button>
-                                        <button type="button" class="btn btn-sm btn-danger ms-2" @onclick="() => RemoveDay(day)">Remove</button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <div class="alert alert-info">No days added yet.</div>
-                }
-            </div>
-            @if (selectedDay != null)
-            {
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <strong>Edit Exercises for: Week @selectedDay.WeekNumber, @selectedDay.DayOfWeek @selectedDay.Name</strong>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-2 align-items-end">
-                            <div class="col-md-4">
-                                <label class="form-label">Exercise</label>
-                                <InputSelect class="form-control" @bind-Value="newExercise.ExerciseId">
-                                    <option value="0">-- Select Exercise --</option>
-                                    @foreach (var ex in allExercises)
-                                    {
-                                        <option value="@ex.Id">@ex.Name</option>
-                                    }
-                                </InputSelect>
+                <div class="col-12">
+                    <div class="row">
+                        <!-- Name and Number of Weeks on the left -->
+                        <div class="col-md-6 d-flex flex-column justify-content-between">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" id="name" class="form-control" @bind="mesocycle.Name" />
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Sets</label>
-                                <InputNumber class="form-control" @bind-Value="newExercise.Sets" />
+                            <div>
+                                <label for="weeks" class="form-label">Number of Weeks</label>
+                                <input type="number" id="weeks" class="form-control" min="1" max="52" @bind="mesocycle.NumberOfWeeks" />
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Reps/Set</label>
-                                <InputNumber class="form-control" @bind-Value="newExercise.RepsPerSet" />
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Weight (kg)</label>
-                                <InputNumber class="form-control" @bind-Value="newExercise.WeightInKg" />
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-success mt-4" @onclick="AddExerciseToDay">Add Exercise</button>
-                            </div>
+                        </div>
+                        <!-- Description on the right -->
+                        <div class="col-md-6 d-flex flex-column">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" class="form-control" rows="5" @bind="mesocycle.Description"></textarea>
                         </div>
                     </div>
                 </div>
-            }
-            <button type="submit" class="btn btn-primary">Create Mesocycle</button>
-            <a class="btn btn-secondary ms-2" href="/mesocycles">Cancel</a>
+            </div>
+            <hr />
+            <div class="d-flex align-items-center mb-2">
+                <h4 class="mb-0 pe-4">Days</h4>
+                <button type="button" class="btn btn-sm btn-primary" @onclick="AddDay">Add Day</button>
+            </div>
+            <div class="mb-3">
+                <div class="days-scroll d-flex flex-row gap-2 overflow-auto flex-nowrap w-100">
+                    @foreach (var day in mesocycle.Days.OrderBy(d => d.DayOfWeek))
+                    {
+                        <div class="card" style="min-width: 180px;">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <InputSelect class="form-select form-select-sm w-auto" @bind-Value="day.DayOfWeek" @onchange="e => OnDayOfWeekChanged(day, e.Value)">
+                                    @foreach (var dayOfWeek in Enum.GetValues<DayOfWeek>())
+                                    {
+                                        if (!mesocycle.Days.Any(d => d != day && d.DayOfWeek == dayOfWeek))
+                                        {
+                                            <option value="@dayOfWeek">@dayOfWeek</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                <button type="button" class="btn p-0 border-0 bg-transparent" style="color: black;" @onclick="() => RemoveDay(day)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="card-body p-2">
+                                <ul class="list-unstyled mb-2">
+                                    @if (day.Exercises.Any())
+                                    {
+                                        foreach (var ex in day.Exercises)
+                                        {
+                                            <li class="d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    @ex.Exercise?.Name
+                                                    <small class="text-muted">(@string.Join(", ", ex.Exercise?.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name) ?? new List<string>()))</small>
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" @onclick="() => RemoveExerciseFromDay(day, ex)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="text-muted">No exercises</li>
+                                    }
+                                </ul>
+                                <div>
+                                    @if (!selectedMuscleGroup.TryGetValue(day.DayOfWeek, out var selMg) || selMg == null)
+                                    {
+                                        <!-- Muscle Group Selection -->
+                                        <select class="form-select form-select-sm mb-2"
+                                                @onchange="e => OnMuscleGroupChanged(day.DayOfWeek, e?.Value ?? string.Empty)">
+                                            <option value="">-- Select Muscle Group --</option>
+                                            @foreach (var mg in Enum.GetValues<MuscleGroups>())
+                                            {
+                                                <option value="@mg">@mg</option>
+                                            }
+                                        </select>
+                                    }
+                                    else if (GetExercisesForDay(day.DayOfWeek).Any())
+                                    {
+                                        <!-- Exercise Selection (filtered by muscle group) -->
+                                        <select class="form-select form-select-sm mb-2"
+                                                @bind="selectedExerciseId[day.DayOfWeek]">
+                                            <option value="0">-- Select Exercise --</option>
+                                            @foreach (var ex in GetExercisesForDay(day.DayOfWeek))
+                                            {
+                                                <option value="@ex.Id">
+                                                    @ex.Name (@string.Join(", ", ex.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name)))
+                                                </option>
+                                            }
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-success w-100" @onclick="() => AddExerciseToDay(day)"
+                                                disabled="@(selectedExerciseId.TryGetValue(day.DayOfWeek, out var exId) && exId > 0 ? null : true)">
+                                            Add
+                                        </button>
+                                    }
+                                    else if (selectedMuscleGroup.TryGetValue(day.DayOfWeek, out var mg) && mg != null && !GetExercisesForDay(day.DayOfWeek).Any())
+                                    {
+                                        <div class="text-muted mb-2">No exercises for this muscle group.</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         </EditForm>
     </div>
 </div>

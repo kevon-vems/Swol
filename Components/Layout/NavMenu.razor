@@ -1,11 +1,11 @@
-﻿<div class="top-row p-3 navbar navbar-dark">
+﻿<div class="top-row navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Swol</a>
     </div>
 </div>
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="Navigation menu" class="navbar-toggler my-nav-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+<div class="nav-scrollable" style="min-width:220px" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
@@ -58,5 +58,6 @@
         border-bottom: 1px solid #555;
         margin-bottom: 0.5rem;
     }
+
 </style>
 

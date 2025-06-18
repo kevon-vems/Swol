@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Swol.Data;
 
@@ -11,9 +12,11 @@ using Swol.Data;
 namespace Swol.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250618153632_PendingModelChanges")]
+    partial class PendingModelChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +33,9 @@ namespace Swol.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -45,222 +51,259 @@ namespace Swol.Migrations
                         new
                         {
                             Id = 1,
+                            Category = "Chest",
                             Description = "Chest exercise",
                             Name = "Bench Press"
                         },
                         new
                         {
                             Id = 2,
+                            Category = "Legs",
                             Description = "Leg exercise",
                             Name = "Squat"
                         },
                         new
                         {
                             Id = 3,
+                            Category = "Back",
                             Description = "Back and legs",
                             Name = "Deadlift"
                         },
                         new
                         {
                             Id = 4,
+                            Category = "Chest",
                             Description = "Seated, bring arms together in front (pec-dec arms)",
                             Name = "Pec Fly"
                         },
                         new
                         {
                             Id = 5,
+                            Category = "Chest",
                             Description = "Press at an incline angle",
                             Name = "Incline Press"
                         },
                         new
                         {
                             Id = 6,
+                            Category = "Back",
                             Description = "Pull bar from overhead to hips",
                             Name = "Pull Over"
                         },
                         new
                         {
                             Id = 7,
+                            Category = "Shoulders",
                             Description = "Pull handles vertically to chin",
                             Name = "Upright Row"
                         },
                         new
                         {
                             Id = 8,
+                            Category = "Shoulders",
                             Description = "Side arm raise (machine/cable)",
                             Name = "Deltoid (Lateral) Raise"
                         },
                         new
                         {
                             Id = 9,
+                            Category = "Shoulders",
                             Description = "Overhead pressing of handles",
                             Name = "Shoulder Press"
                         },
                         new
                         {
                             Id = 10,
+                            Category = "Back",
                             Description = "Pull handles toward torso while bent over",
                             Name = "Bent Over Row"
                         },
                         new
                         {
                             Id = 11,
+                            Category = "Back",
                             Description = "Seated, pull handles to waist",
                             Name = "Seated Row"
                         },
                         new
                         {
                             Id = 12,
+                            Category = "Shoulders",
                             Description = "Elevate shoulders with resistance",
                             Name = "Shoulder Shrug"
                         },
                         new
                         {
                             Id = 13,
+                            Category = "Core",
                             Description = "Curl torso with cable or strap",
                             Name = "Ab Crunch"
                         },
                         new
                         {
                             Id = 14,
+                            Category = "Core",
                             Description = "Side bends with cable or strap",
                             Name = "Oblique Bend"
                         },
                         new
                         {
                             Id = 15,
+                            Category = "Arms",
                             Description = "Curl using low pulley",
                             Name = "Standing Biceps Curl"
                         },
                         new
                         {
                             Id = 16,
+                            Category = "Arms",
                             Description = "Curl over preacher pad (if attachment available)",
                             Name = "Preacher Curl"
                         },
                         new
                         {
                             Id = 17,
+                            Category = "Arms",
                             Description = "Curl with overhand grip (low pulley or bar)",
                             Name = "Reverse Curl"
                         },
                         new
                         {
                             Id = 18,
+                            Category = "Arms",
                             Description = "Push cable down from overhead pulley",
                             Name = "Tricep Press Down"
                         },
                         new
                         {
                             Id = 19,
+                            Category = "Arms",
                             Description = "Seated or standing cable extension",
                             Name = "Tricep Extension"
                         },
                         new
                         {
                             Id = 20,
+                            Category = "Arms",
                             Description = "Face away from pulley, extend arms overhead",
                             Name = "Overhead Tricep Extension"
                         },
                         new
                         {
                             Id = 21,
+                            Category = "Chest",
                             Description = "Standing, bring cables together in front",
                             Name = "Cable Chest Fly"
                         },
                         new
                         {
                             Id = 22,
+                            Category = "Chest",
                             Description = "Single-arm, pull cable across body",
                             Name = "Cable Crossover"
                         },
                         new
                         {
                             Id = 23,
+                            Category = "Shoulders",
                             Description = "Side arm raise using low cable",
                             Name = "Cable Lateral Raise"
                         },
                         new
                         {
                             Id = 24,
+                            Category = "Shoulders",
                             Description = "Front arm raise with cable",
                             Name = "Cable Front Raise"
                         },
                         new
                         {
                             Id = 25,
+                            Category = "Shoulders",
                             Description = "Arms out to sides using cables",
                             Name = "Cable Reverse Fly (Rear Delt)"
                         },
                         new
                         {
                             Id = 26,
+                            Category = "Back",
                             Description = "Pull bar down from overhead",
                             Name = "Lat Pulldown (with bar)"
                         },
                         new
                         {
                             Id = 27,
+                            Category = "Back",
                             Description = "Pull cable to abs or lower chest",
                             Name = "Cable Row (Standing/Kneeling)"
                         },
                         new
                         {
                             Id = 28,
+                            Category = "Core",
                             Description = "Diagonal cable pull for core rotation",
                             Name = "Woodchop (Cable)"
                         },
                         new
                         {
                             Id = 29,
+                            Category = "Core",
                             Description = "Lateral trunk bend with cable",
                             Name = "Cable Side Bend"
                         },
                         new
                         {
                             Id = 30,
+                            Category = "Legs",
                             Description = "Straighten knee with padded lever",
                             Name = "Leg Extension"
                         },
                         new
                         {
                             Id = 31,
+                            Category = "Legs",
                             Description = "Curl heel to glute with padded lever or cable",
                             Name = "Leg Curl"
                         },
                         new
                         {
                             Id = 32,
+                            Category = "Legs",
                             Description = "Rear leg extension using low cable/strap",
                             Name = "Glute Kickback"
                         },
                         new
                         {
                             Id = 33,
+                            Category = "Legs",
                             Description = "Leg away from midline with ankle strap",
                             Name = "Hip Abduction (Cable)"
                         },
                         new
                         {
                             Id = 34,
+                            Category = "Legs",
                             Description = "Leg toward midline with ankle strap",
                             Name = "Hip Adduction (Cable)"
                         },
                         new
                         {
                             Id = 35,
+                            Category = "Legs",
                             Description = "Heel to glute using ankle strap",
                             Name = "Standing Leg Curl (Cable)"
                         },
                         new
                         {
                             Id = 36,
+                            Category = "Legs",
                             Description = "Push up on toes using resistance",
                             Name = "Standing Calf Raise (Cable)"
                         },
                         new
                         {
                             Id = 37,
+                            Category = "Legs",
                             Description = "Seated, push platform with feet",
                             Name = "Leg Press (Optional Attachment)"
                         });
@@ -288,13 +331,143 @@ namespace Swol.Migrations
                         },
                         new
                         {
+                            ExerciseId = 1,
+                            MuscleGroupId = 10
+                        },
+                        new
+                        {
+                            ExerciseId = 1,
+                            MuscleGroupId = 16
+                        },
+                        new
+                        {
                             ExerciseId = 4,
                             MuscleGroupId = 1
                         },
                         new
                         {
                             ExerciseId = 5,
+                            MuscleGroupId = 2
+                        },
+                        new
+                        {
+                            ExerciseId = 5,
+                            MuscleGroupId = 10
+                        },
+                        new
+                        {
+                            ExerciseId = 5,
+                            MuscleGroupId = 16
+                        },
+                        new
+                        {
+                            ExerciseId = 6,
+                            MuscleGroupId = 6
+                        },
+                        new
+                        {
+                            ExerciseId = 6,
                             MuscleGroupId = 1
+                        },
+                        new
+                        {
+                            ExerciseId = 6,
+                            MuscleGroupId = 16
+                        },
+                        new
+                        {
+                            ExerciseId = 7,
+                            MuscleGroupId = 13
+                        },
+                        new
+                        {
+                            ExerciseId = 7,
+                            MuscleGroupId = 9
+                        },
+                        new
+                        {
+                            ExerciseId = 8,
+                            MuscleGroupId = 11
+                        },
+                        new
+                        {
+                            ExerciseId = 9,
+                            MuscleGroupId = 9
+                        },
+                        new
+                        {
+                            ExerciseId = 9,
+                            MuscleGroupId = 16
+                        },
+                        new
+                        {
+                            ExerciseId = 10,
+                            MuscleGroupId = 6
+                        },
+                        new
+                        {
+                            ExerciseId = 10,
+                            MuscleGroupId = 12
+                        },
+                        new
+                        {
+                            ExerciseId = 10,
+                            MuscleGroupId = 7
+                        },
+                        new
+                        {
+                            ExerciseId = 11,
+                            MuscleGroupId = 5
+                        },
+                        new
+                        {
+                            ExerciseId = 11,
+                            MuscleGroupId = 6
+                        },
+                        new
+                        {
+                            ExerciseId = 12,
+                            MuscleGroupId = 13
+                        },
+                        new
+                        {
+                            ExerciseId = 13,
+                            MuscleGroupId = 19
+                        },
+                        new
+                        {
+                            ExerciseId = 14,
+                            MuscleGroupId = 20
+                        },
+                        new
+                        {
+                            ExerciseId = 15,
+                            MuscleGroupId = 15
+                        },
+                        new
+                        {
+                            ExerciseId = 16,
+                            MuscleGroupId = 15
+                        },
+                        new
+                        {
+                            ExerciseId = 17,
+                            MuscleGroupId = 17
+                        },
+                        new
+                        {
+                            ExerciseId = 18,
+                            MuscleGroupId = 16
+                        },
+                        new
+                        {
+                            ExerciseId = 19,
+                            MuscleGroupId = 16
+                        },
+                        new
+                        {
+                            ExerciseId = 20,
+                            MuscleGroupId = 16
                         },
                         new
                         {
@@ -308,203 +481,128 @@ namespace Swol.Migrations
                         },
                         new
                         {
-                            ExerciseId = 3,
-                            MuscleGroupId = 2
-                        },
-                        new
-                        {
-                            ExerciseId = 6,
-                            MuscleGroupId = 2
-                        },
-                        new
-                        {
-                            ExerciseId = 10,
-                            MuscleGroupId = 2
-                        },
-                        new
-                        {
-                            ExerciseId = 11,
-                            MuscleGroupId = 2
-                        },
-                        new
-                        {
-                            ExerciseId = 26,
-                            MuscleGroupId = 2
-                        },
-                        new
-                        {
-                            ExerciseId = 27,
-                            MuscleGroupId = 2
-                        },
-                        new
-                        {
-                            ExerciseId = 7,
-                            MuscleGroupId = 3
-                        },
-                        new
-                        {
-                            ExerciseId = 8,
-                            MuscleGroupId = 3
-                        },
-                        new
-                        {
-                            ExerciseId = 9,
-                            MuscleGroupId = 3
-                        },
-                        new
-                        {
-                            ExerciseId = 12,
-                            MuscleGroupId = 3
+                            ExerciseId = 22,
+                            MuscleGroupId = 18
                         },
                         new
                         {
                             ExerciseId = 23,
-                            MuscleGroupId = 3
+                            MuscleGroupId = 11
                         },
                         new
                         {
                             ExerciseId = 24,
-                            MuscleGroupId = 3
-                        },
-                        new
-                        {
-                            ExerciseId = 25,
-                            MuscleGroupId = 3
-                        },
-                        new
-                        {
-                            ExerciseId = 1,
-                            MuscleGroupId = 4
-                        },
-                        new
-                        {
-                            ExerciseId = 5,
-                            MuscleGroupId = 4
-                        },
-                        new
-                        {
-                            ExerciseId = 18,
-                            MuscleGroupId = 4
-                        },
-                        new
-                        {
-                            ExerciseId = 19,
-                            MuscleGroupId = 4
-                        },
-                        new
-                        {
-                            ExerciseId = 20,
-                            MuscleGroupId = 4
-                        },
-                        new
-                        {
-                            ExerciseId = 15,
-                            MuscleGroupId = 5
-                        },
-                        new
-                        {
-                            ExerciseId = 16,
-                            MuscleGroupId = 5
-                        },
-                        new
-                        {
-                            ExerciseId = 2,
-                            MuscleGroupId = 6
-                        },
-                        new
-                        {
-                            ExerciseId = 30,
-                            MuscleGroupId = 6
-                        },
-                        new
-                        {
-                            ExerciseId = 37,
-                            MuscleGroupId = 6
-                        },
-                        new
-                        {
-                            ExerciseId = 32,
-                            MuscleGroupId = 7
-                        },
-                        new
-                        {
-                            ExerciseId = 33,
-                            MuscleGroupId = 7
-                        },
-                        new
-                        {
-                            ExerciseId = 34,
-                            MuscleGroupId = 7
-                        },
-                        new
-                        {
-                            ExerciseId = 37,
-                            MuscleGroupId = 7
-                        },
-                        new
-                        {
-                            ExerciseId = 31,
-                            MuscleGroupId = 8
-                        },
-                        new
-                        {
-                            ExerciseId = 35,
-                            MuscleGroupId = 8
-                        },
-                        new
-                        {
-                            ExerciseId = 37,
-                            MuscleGroupId = 8
-                        },
-                        new
-                        {
-                            ExerciseId = 36,
-                            MuscleGroupId = 9
-                        },
-                        new
-                        {
-                            ExerciseId = 37,
-                            MuscleGroupId = 9
-                        },
-                        new
-                        {
-                            ExerciseId = 12,
                             MuscleGroupId = 10
                         },
                         new
                         {
-                            ExerciseId = 6,
-                            MuscleGroupId = 11
-                        },
-                        new
-                        {
-                            ExerciseId = 26,
-                            MuscleGroupId = 11
-                        },
-                        new
-                        {
-                            ExerciseId = 17,
+                            ExerciseId = 25,
                             MuscleGroupId = 12
                         },
                         new
                         {
-                            ExerciseId = 13,
-                            MuscleGroupId = 13
+                            ExerciseId = 25,
+                            MuscleGroupId = 7
                         },
                         new
                         {
-                            ExerciseId = 14,
-                            MuscleGroupId = 13
+                            ExerciseId = 26,
+                            MuscleGroupId = 6
+                        },
+                        new
+                        {
+                            ExerciseId = 26,
+                            MuscleGroupId = 7
+                        },
+                        new
+                        {
+                            ExerciseId = 26,
+                            MuscleGroupId = 15
+                        },
+                        new
+                        {
+                            ExerciseId = 27,
+                            MuscleGroupId = 5
+                        },
+                        new
+                        {
+                            ExerciseId = 27,
+                            MuscleGroupId = 6
                         },
                         new
                         {
                             ExerciseId = 28,
-                            MuscleGroupId = 13
+                            MuscleGroupId = 20
+                        },
+                        new
+                        {
+                            ExerciseId = 28,
+                            MuscleGroupId = 19
                         },
                         new
                         {
                             ExerciseId = 29,
-                            MuscleGroupId = 13
+                            MuscleGroupId = 20
+                        },
+                        new
+                        {
+                            ExerciseId = 30,
+                            MuscleGroupId = 22
+                        },
+                        new
+                        {
+                            ExerciseId = 31,
+                            MuscleGroupId = 23
+                        },
+                        new
+                        {
+                            ExerciseId = 32,
+                            MuscleGroupId = 21
+                        },
+                        new
+                        {
+                            ExerciseId = 32,
+                            MuscleGroupId = 23
+                        },
+                        new
+                        {
+                            ExerciseId = 33,
+                            MuscleGroupId = 21
+                        },
+                        new
+                        {
+                            ExerciseId = 34,
+                            MuscleGroupId = 21
+                        },
+                        new
+                        {
+                            ExerciseId = 35,
+                            MuscleGroupId = 23
+                        },
+                        new
+                        {
+                            ExerciseId = 36,
+                            MuscleGroupId = 24
+                        },
+                        new
+                        {
+                            ExerciseId = 37,
+                            MuscleGroupId = 22
+                        },
+                        new
+                        {
+                            ExerciseId = 37,
+                            MuscleGroupId = 21
+                        },
+                        new
+                        {
+                            ExerciseId = 37,
+                            MuscleGroupId = 23
+                        },
+                        new
+                        {
+                            ExerciseId = 37,
+                            MuscleGroupId = 24
                         });
                 });
 
@@ -659,62 +757,117 @@ namespace Swol.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "Back"
+                            Name = "Upper Chest"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Shoulders"
+                            Name = "Middle Chest"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "Triceps"
+                            Name = "Lower Chest"
                         },
                         new
                         {
                             Id = 5,
-                            Name = "Biceps"
+                            Name = "Back"
                         },
                         new
                         {
                             Id = 6,
-                            Name = "Quads"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Glutes"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Hamstrings"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "Calves"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "Traps"
-                        },
-                        new
-                        {
-                            Id = 11,
                             Name = "Lats"
                         },
                         new
                         {
+                            Id = 7,
+                            Name = "Upper Back (Traps, Rhomboids)"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Lower Back"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Shoulders"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Front Delts"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Side Delts"
+                        },
+                        new
+                        {
                             Id = 12,
-                            Name = "Forearms"
+                            Name = "Rear Delts"
                         },
                         new
                         {
                             Id = 13,
+                            Name = "Traps"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "Arms"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "Biceps"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "Triceps"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "Forearms"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Name = "Core"
+                        },
+                        new
+                        {
+                            Id = 19,
                             Name = "Abs"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Name = "Obliques"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Name = "Glutes"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Name = "Quads"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Name = "Hamstrings"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Name = "Calves"
                         });
                 });
 

@@ -15,6 +15,9 @@ public partial class MesocycleCreate : ComponentBase
     private Dictionary<DayOfWeek, int> newExerciseDayId = new();
     private Dictionary<DayOfWeek, MuscleGroups?> selectedMuscleGroup = new();
     private Dictionary<DayOfWeek, int> selectedExerciseId = new();
+    private HashSet<(DayOfWeek, int)> editingExercises = new();
+    private Dictionary<(DayOfWeek, int), MuscleGroups?> editingMuscleGroup = new();
+    public string? selectedDayToAdd { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -24,8 +27,13 @@ public partial class MesocycleCreate : ComponentBase
             .OrderBy(e => e.Name)
             .ToListAsync();
         // Start with two days (Monday, Tuesday)
+        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Sunday });
         mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Monday });
         mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Tuesday });
+        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Wednesday });
+        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Thursday });
+        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Friday});
+        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Saturday });
         foreach (var d in mesocycle.Days)
             newExerciseDayId[d.DayOfWeek] = 0;
     }
@@ -48,6 +56,26 @@ public partial class MesocycleCreate : ComponentBase
         StateHasChanged();
     }
 
+    private void OnExerciseSelected(MesocycleDay day, object value, MesocycleDayExercise? editingEx = null)
+    {
+        if (int.TryParse(value?.ToString(), out var exId) && exId > 0)
+        {
+            if (editingEx != null)
+            {
+                var exercise = allExercises.FirstOrDefault(e => e.Id == exId);
+                if (exercise == null) return;
+                editingEx.ExerciseId = exId;
+                editingEx.Exercise = exercise;
+            }
+            else
+            {
+                selectedExerciseId[day.DayOfWeek] = exId;
+                AddExerciseToDay(day);
+                selectedExerciseId[day.DayOfWeek] = 0; // Reset selection
+            }
+            StateHasChanged();
+        }
+    }
     private void AddExerciseToDay(MesocycleDay day)
     {
         if (!selectedExerciseId.TryGetValue(day.DayOfWeek, out var exId) || exId == 0) return;
@@ -61,7 +89,7 @@ public partial class MesocycleCreate : ComponentBase
             OrderInDay = day.Exercises.Count + 1
         };
         day.Exercises.Add(ex);
-        // Reset to muscle group selection for this day
+
         selectedMuscleGroup[day.DayOfWeek] = null;
         selectedExerciseId[day.DayOfWeek] = 0;
         StateHasChanged();
@@ -75,27 +103,40 @@ public partial class MesocycleCreate : ComponentBase
             selectedMuscleGroup[day] = null;
         selectedExerciseId[day] = 0; // Reset exercise selection
     }
-
-    private void OnExerciseSelectChanged(DayOfWeek day, object value)
+    private void RemoveSelectedMuscleGroup(DayOfWeek dayOfWeek)
     {
-        if (int.TryParse(value?.ToString(), out var id))
-            selectedExerciseId[day] = id;
-        else
-            selectedExerciseId[day] = 0;
-    }
-
-    private IEnumerable<Exercise> GetExercisesForDay(DayOfWeek day)
-    {
-        if (selectedMuscleGroup.TryGetValue(day, out var mg) && mg != null)
+        if (selectedMuscleGroup.ContainsKey(dayOfWeek))
         {
-            // Only match on muscle groups that exist in both enum and DB
-            return allExercises.Where(e =>
-                e.ExerciseMuscleGroups.Any(emg => string.Equals(emg.MuscleGroup.Name, mg.ToString(), StringComparison.OrdinalIgnoreCase))
-            );
+            selectedMuscleGroup.Remove(dayOfWeek);
+            StateHasChanged();
+        }
+    }
+    private void StartEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
+    {
+        editingExercises.Add((dayOfWeek, exerciseId));
+        var day = mesocycle.Days.FirstOrDefault(d => d.DayOfWeek == dayOfWeek);
+        var ex = day?.Exercises.FirstOrDefault(e => e.Exercise?.Id == exerciseId);
+
+        if (ex?.Exercise != null)
+        {
+            var mg = ex.Exercise.ExerciseMuscleGroups.FirstOrDefault()?.MuscleGroup;
+            if (mg != null)
+                editingMuscleGroup[(dayOfWeek, exerciseId)] = Enum.Parse<MuscleGroups>(mg.Name);
+        }
+    }
+    private void StopEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
+    {
+        editingExercises.Remove((dayOfWeek, exerciseId));
+        editingMuscleGroup.Remove((dayOfWeek, exerciseId));
+    }
+    private IEnumerable<Exercise> GetExercisesForDay(DayOfWeek dayOfWeek)
+    {
+        if (selectedMuscleGroup.TryGetValue(dayOfWeek, out var mg) && mg != null)
+        {
+            return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == mg.ToString()));
         }
         return Enumerable.Empty<Exercise>();
     }
-
     private void RemoveExerciseFromDay(MesocycleDay day, MesocycleDayExercise ex)
     {
         day.Exercises.Remove(ex);

@@ -1,18 +1,27 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row">
+<div class="layout-root">
+    <header class="layout-header">
+        <a class="navbar-brand" href="">Swol</a>
+        <!-- Hamburger and nav menu for mobile -->
+        <input type="checkbox" id="nav-toggle" class="navbar-toggler" />
+        <label for="nav-toggle" class="hamburger" aria-label="Open navigation menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <div class="mobile-nav">
+            <NavMenu />
         </div>
-
-        <article class="content px-4">
+    </header>
+    <div class="layout-main">
+        <nav class="layout-sidebar">
+            <NavMenu />
+        </nav>
+        <section class="layout-content">
             @Body
-        </article>
-    </main>
+        </section>
+    </div>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>

@@ -346,6 +346,9 @@
   .justify-self-end {
     justify-self: flex-end;
   }
+  .justify-self-start {
+    justify-self: flex-start;
+  }
   .overflow-auto {
     overflow: auto;
   }

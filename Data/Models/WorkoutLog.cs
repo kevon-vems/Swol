@@ -6,12 +6,12 @@ public class WorkoutLog
     public int WorkoutId { get; set; }
     public Workout Workout { get; set; } = null!;
     
-    // Optional reference to a Mesocycle (if this workout is part of one)
-    public int? MesocycleId { get; set; }
-    public Mesocycle? Mesocycle { get; set; }
+    // Optional reference to a Workout Template (if this workout is part of one)
+    public int? WorkoutTemplateId { get; set; }
+    public WorkoutTemplate? WorkoutTemplate { get; set; }
     
-    // Week number within the Mesocycle (if applicable)
-    public int? MesocycleWeek { get; set; }
+    // Week number within the Workout Template (if applicable)
+    public int? WorkoutTemplateWeek { get; set; }
     
     // Reference to the specific MesocycleDay (if applicable)
     public int? MesocycleDayId { get; set; }

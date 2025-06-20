@@ -1,6 +1,6 @@
 namespace Swol.Data.Models;
 
-public class Mesocycle
+public class WorkoutTemplate
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;

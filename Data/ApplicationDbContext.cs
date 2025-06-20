@@ -18,7 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ExerciseSet> ExerciseSets => Set<ExerciseSet>();
     public DbSet<MuscleGroup> MuscleGroups => Set<MuscleGroup>();
     public DbSet<ExerciseMuscleGroup> ExerciseMuscleGroups => Set<ExerciseMuscleGroup>();
-    public DbSet<Mesocycle> Mesocycles => Set<Mesocycle>();
+    public DbSet<WorkoutTemplate> WorkoutTemplates => Set<WorkoutTemplate>();
     public DbSet<MesocycleDay> MesocycleDays => Set<MesocycleDay>();
     public DbSet<MesocycleDayExercise> MesocycleDayExercises => Set<MesocycleDayExercise>();
     
@@ -38,11 +38,11 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(emg => emg.MuscleGroupId);
 
-        // Mesocycle -> Days
+        // WorkoutTemplate -> Days
         modelBuilder.Entity<MesocycleDay>()
-            .HasOne(md => md.Mesocycle)
+            .HasOne(md => md.WorkoutTemplate)
             .WithMany(m => m.Days)
-            .HasForeignKey(md => md.MesocycleId);
+            .HasForeignKey(md => md.WorkoutTemplateId);
 
         // MesocycleDay -> Exercises
         modelBuilder.Entity<MesocycleDayExercise>()

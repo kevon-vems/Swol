@@ -1,10 +1,10 @@
-﻿@page "/mesocycles/{MesocycleId:int}/weeks/{WeekNumber:int}/days/{DayNumber:int}"
+@page "/templates/{WorkoutTemplateId:int}/weeks/{WeekNumber:int}/days/{DayNumber:int}"
 @inject Swol.Data.ApplicationDbContext Db
 @inject NavigationManager Nav
 @using Swol.Data.Models
 @using Microsoft.EntityFrameworkCore
 
-<PageTitle>Mesocycle Day</PageTitle>
+<PageTitle>Template Day</PageTitle>
 
 @if (isLoading)
 {
@@ -16,7 +16,7 @@ else if (day == null)
 }
 else
 {
-    <h1 class="text-3xl font-bold mb-4">@day.Mesocycle.Name - Week @day.WeekNumber Day @day.DayNumber (@day.DayOfWeek)</h1>
+    <h1 class="text-3xl font-bold mb-4">@day.WorkoutTemplate.Name - Week @day.WeekNumber Day @day.DayNumber (@day.DayOfWeek)</h1>
 
     @if (day.Exercises.Any())
     {
@@ -55,7 +55,7 @@ else
 }
 
 @code {
-    [Parameter] public int MesocycleId { get; set; }
+    [Parameter] public int WorkoutTemplateId { get; set; }
     [Parameter] public int WeekNumber { get; set; }
     [Parameter] public int DayNumber { get; set; }
 
@@ -65,10 +65,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         day = await Db.MesocycleDays
-            .Include(d => d.Mesocycle)
+            .Include(d => d.WorkoutTemplate)
             .Include(d => d.Exercises)
                 .ThenInclude(e => e.Exercise)
-            .FirstOrDefaultAsync(d => d.MesocycleId == MesocycleId &&
+            .FirstOrDefaultAsync(d => d.WorkoutTemplateId == WorkoutTemplateId &&
                                       d.WeekNumber == WeekNumber &&
                                       d.DayNumber == DayNumber);
 

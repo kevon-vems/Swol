@@ -50,25 +50,25 @@ else
         </div>
         
         <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mesocycle (Optional)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Template (Optional)</label>
             <div class="flex flex-col md:flex-row gap-6">
                 <div class="flex-1">
-                    <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="selectedMesocycleId">
-                        <option value="">-- No Mesocycle --</option>
-                        @foreach (var mesocycle in mesocycles)
+                    <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="selectedTemplateId">
+                        <option value="">-- No Template --</option>
+                        @foreach (var template in templates)
                         {
-                            <option value="@mesocycle.Id">@mesocycle.Name @(mesocycle.IsActive ? "(Active)" : "")</option>
+                            <option value="@template.Id">@template.Name @(template.IsActive ? "(Active)" : "")</option>
                         }
                     </InputSelect>
                 </div>
                 <div class="flex-1">
-                    @if (selectedMesocycleId.HasValue)
+                    @if (selectedTemplateId.HasValue)
                     {
-                        <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.MesocycleWeek">
+                        <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.WorkoutTemplateWeek">
                             <option value="">-- Select Week --</option>
-                            @for (int i = 1; i <= selectedMesocycle?.NumberOfWeeks; i++)
+                            @for (int i = 1; i <= selectedTemplate?.NumberOfWeeks; i++)
                             {
-                                <option value="@i">Week @i @(i == selectedMesocycle?.NumberOfWeeks ? "(Deload)" : "")</option>
+                                <option value="@i">Week @i @(i == selectedTemplate?.NumberOfWeeks ? "(Deload)" : "")</option>
                             }
                         </InputSelect>
                     }
@@ -154,11 +154,11 @@ else
 
     private WorkoutLog? log;
     private List<Workout>? workouts;
-    private List<Mesocycle> mesocycles = new();
+    private List<WorkoutTemplate> templates = new();
     private List<Exercise> exercises = new();
-    private int? selectedMesocycleId;
-    private Mesocycle? selectedMesocycle => selectedMesocycleId.HasValue 
-                                          ? mesocycles.FirstOrDefault(m => m.Id == selectedMesocycleId)
+    private int? selectedTemplateId;
+    private WorkoutTemplate? selectedTemplate => selectedTemplateId.HasValue
+                                          ? templates.FirstOrDefault(m => m.Id == selectedTemplateId)
                                           : null;
 
     protected override async Task OnInitializedAsync()
@@ -174,19 +174,19 @@ else
         }
         
         workouts = await Db.Workouts.OrderBy(w => w.Name).ToListAsync();
-        mesocycles = await Db.Mesocycles
+        templates = await Db.WorkoutTemplates
             .OrderByDescending(m => m.IsActive)
             .ThenByDescending(m => m.StartDate)
             .ToListAsync();
             
         exercises = await Db.Exercises.ToListAsync();
         
-        selectedMesocycleId = log.MesocycleId;
+        selectedTemplateId = log.WorkoutTemplateId;
     }
 
     private async Task HandleValidSubmit()
     {
-        log!.MesocycleId = selectedMesocycleId;
+        log!.WorkoutTemplateId = selectedTemplateId;
         Db.Update(log);
         await Db.SaveChangesAsync();
         Nav.NavigateTo("/workoutlogs");

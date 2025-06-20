@@ -56,6 +56,12 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(mde => mde.ExerciseId);
 
+        // Workout -> Template
+        modelBuilder.Entity<Workout>()
+            .HasOne(w => w.WorkoutTemplate)
+            .WithMany()
+            .HasForeignKey(w => w.WorkoutTemplateId);
+
         // Workout -> Days
         modelBuilder.Entity<WorkoutDay>()
             .HasOne(wd => wd.Workout)

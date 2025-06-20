@@ -603,17 +603,11 @@ namespace Swol.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("NumberOfWeeks")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("StartDate")
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -633,9 +627,6 @@ namespace Swol.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WeekNumber")
                         .HasColumnType("int");
 
                     b.Property<int>("WorkoutTemplateId")
@@ -682,17 +673,28 @@ namespace Swol.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfWeeks")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("WorkoutTemplateId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WorkoutTemplateId");
 
                     b.ToTable("Workouts");
                 });
@@ -883,6 +885,7 @@ namespace Swol.Migrations
             modelBuilder.Entity("Swol.Data.Models.Work.Workout", b =>
                 {
                     b.Navigation("Days");
+                    b.Navigation("WorkoutTemplate");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.Work.WorkoutDay", b =>

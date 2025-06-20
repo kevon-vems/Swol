@@ -6,6 +6,8 @@
 
 <PageTitle>Edit Exercise Set</PageTitle>
 
+<div class="max-w-4xl mx-auto p-4 space-y-6">
+
 <h1 class="text-2xl font-bold mb-6">Edit Exercise Set</h1>
 
 @if (set == null || workoutLogs == null || exercises == null)
@@ -49,6 +51,8 @@ else
         <a class="ml-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow" href="/exercisesets">Cancel</a>
     </EditForm>
 }
+
+</div>
 
 @code {
     [Parameter]

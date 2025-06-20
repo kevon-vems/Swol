@@ -10,16 +10,16 @@
     height: 3.5rem;
     display: flex;
     align-items: center;
-    background: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    background: linear-gradient(90deg, rgb(5,39,103) 0%, #3a0647 70%);
     padding: 0 1.5rem;
     position: relative;
+    color: #fff;
     z-index: 10;
 }
 
 .navbar-brand {
     font-size: 1.1rem;
-    color: #222;
+    color: white;
     text-decoration: none;
     font-weight: bold;
 }
@@ -67,6 +67,7 @@
 
 .layout-content{
     padding: 0.5rem;
+    background: #f9fafb;
 }
 
 @media (max-width: 640px) {
@@ -121,7 +122,7 @@
         flex: 1 1 0;
         overflow-y: auto;
         padding: 2rem 1.5rem;
-        background: #fff;
+        background: #f9fafb;
     }
 
     .navbar-toggler,

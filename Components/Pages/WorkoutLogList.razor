@@ -25,7 +25,7 @@ else
                 <tr>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Date</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Workout</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Mesocycle</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Template</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Duration</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Sets</th>
                     <th class="px-4 py-2 border-b"></th>
@@ -38,9 +38,9 @@ else
                         <td class="px-4 py-2">@log.StartTime.ToShortDateString()</td>
                         <td class="px-4 py-2">@log.Workout?.Name</td>
                         <td class="px-4 py-2">
-                            @if (log.Mesocycle != null)
+                            @if (log.WorkoutTemplate != null)
                             {
-                                <span>@log.Mesocycle.Name - Week @log.MesocycleWeek</span>
+                                <span>@log.WorkoutTemplate.Name - Week @log.WorkoutTemplateWeek</span>
                             }
                             else
                             {
@@ -78,7 +78,7 @@ else
     {
         logs = await Db.WorkoutLogs
             .Include(wl => wl.Workout)
-            .Include(wl => wl.Mesocycle)
+            .Include(wl => wl.WorkoutTemplate)
             .Include(wl => wl.ExerciseSets)
             .OrderByDescending(wl => wl.StartTime)
             .ToListAsync();

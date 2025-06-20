@@ -546,7 +546,7 @@ namespace Swol.Migrations
                     b.ToTable("ExerciseSets");
                 });
 
-            modelBuilder.Entity("Swol.Data.Models.Mesocycle", b =>
+            modelBuilder.Entity("Swol.Data.Models.WorkoutTemplate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -572,7 +572,7 @@ namespace Swol.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Mesocycles");
+                    b.ToTable("WorkoutTemplates");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.MesocycleDay", b =>
@@ -589,7 +589,7 @@ namespace Swol.Migrations
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.Property<int>("MesocycleId")
+                    b.Property<int>("WorkoutTemplateId")
                         .HasColumnType("int");
 
                     b.Property<int>("WeekNumber")
@@ -597,7 +597,7 @@ namespace Swol.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MesocycleId");
+                    b.HasIndex("WorkoutTemplateId");
 
                     b.ToTable("MesocycleDays");
                 });
@@ -817,10 +817,10 @@ namespace Swol.Migrations
                     b.Property<int?>("MesocycleDayId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MesocycleId")
+                    b.Property<int?>("WorkoutTemplateId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MesocycleWeek")
+                    b.Property<int?>("WorkoutTemplateWeek")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
@@ -836,7 +836,7 @@ namespace Swol.Migrations
 
                     b.HasIndex("MesocycleDayId");
 
-                    b.HasIndex("MesocycleId");
+                    b.HasIndex("WorkoutTemplateId");
 
                     b.HasIndex("WorkoutId");
 
@@ -883,13 +883,13 @@ namespace Swol.Migrations
 
             modelBuilder.Entity("Swol.Data.Models.MesocycleDay", b =>
                 {
-                    b.HasOne("Swol.Data.Models.Mesocycle", "Mesocycle")
+                    b.HasOne("Swol.Data.Models.WorkoutTemplate", "WorkoutTemplate")
                         .WithMany("Days")
-                        .HasForeignKey("MesocycleId")
+                        .HasForeignKey("WorkoutTemplateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Mesocycle");
+                    b.Navigation("WorkoutTemplate");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.MesocycleDayExercise", b =>
@@ -948,9 +948,9 @@ namespace Swol.Migrations
                         .HasForeignKey("MesocycleDayId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Swol.Data.Models.Mesocycle", "Mesocycle")
+                    b.HasOne("Swol.Data.Models.WorkoutTemplate", "WorkoutTemplate")
                         .WithMany("WorkoutLogs")
-                        .HasForeignKey("MesocycleId");
+                        .HasForeignKey("WorkoutTemplateId");
 
                     b.HasOne("Swol.Data.Models.Workout", "Workout")
                         .WithMany("WorkoutLogs")
@@ -958,7 +958,7 @@ namespace Swol.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Mesocycle");
+                    b.Navigation("WorkoutTemplate");
 
                     b.Navigation("MesocycleDay");
 
@@ -970,7 +970,7 @@ namespace Swol.Migrations
                     b.Navigation("ExerciseMuscleGroups");
                 });
 
-            modelBuilder.Entity("Swol.Data.Models.Mesocycle", b =>
+            modelBuilder.Entity("Swol.Data.Models.WorkoutTemplate", b =>
                 {
                     b.Navigation("Days");
 

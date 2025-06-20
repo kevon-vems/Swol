@@ -1,0 +1,93 @@
+@page "/templates"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Nav
+@using Swol.Data.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Workout Templates</PageTitle>
+
+<div class="max-w-4xl mx-auto p-4 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h1 class="text-3xl font-bold mb-4 sm:mb-0">Workout Templates</h1>
+        <a href="/templates/form" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Create New Template</a>
+    </div>
+
+@if (templates == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!templates.Any())
+{
+    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+        <p>No templates found. Create your first template to start tracking your progress.</p>
+    </div>
+}
+else
+{
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach (var template in templates)
+        {
+            <div class="bg-white rounded shadow-sm border flex flex-col @(template.IsActive ? "border-blue-600" : "border-gray-200")">
+                <div class="flex items-center justify-between px-4 py-2 border-b">
+                    <h5 class="font-semibold m-0">@template.Name</h5>
+                    @if (template.IsActive)
+                    {
+                        <span class="text-xs font-semibold text-white bg-blue-600 px-2 py-1 rounded">Active</span>
+                    }
+                </div>
+                <div class="p-4 text-sm flex-grow">
+                    <p><strong>Start:</strong> @template.StartDate.ToShortDateString()</p>
+                    <p><strong>Weeks:</strong> @template.NumberOfWeeks</p>
+                    @if (template.WorkoutLogs.Any())
+                    {
+                        <p><strong>Completed Workouts:</strong> @template.WorkoutLogs.Count(wl => wl.EndTime.HasValue)</p>
+                    }
+                </div>
+                <div class="px-4 py-2 border-t flex gap-3">
+                    <a href="/templates/form/@template.Id" class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
+                    <a href="/templates/delete/@template.Id" class="text-sm text-red-600 hover:text-red-800">Delete</a>
+                    @if (!template.IsActive)
+                    {
+                        <button type="button" class="text-sm text-green-600 hover:text-green-800" @onclick="() => SetActiveAsync(template.Id)">Set Active</button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+</div>
+
+@code {
+    private List<WorkoutTemplate>? templates;
+
+    protected override async Task OnInitializedAsync()
+    {
+        templates = await Db.WorkoutTemplates
+            .Include(m => m.WorkoutLogs)
+            .OrderByDescending(m => m.IsActive)
+            .ThenByDescending(m => m.StartDate)
+            .ToListAsync();
+    }
+    
+    private async Task SetActiveAsync(int templateId)
+    {
+        if (templates == null) return;
+        
+        // Deactivate all templates
+        foreach (var m in templates.Where(m => m.IsActive))
+        {
+            m.IsActive = false;
+        }
+        
+        // Activate the selected template
+        var template = templates.FirstOrDefault(m => m.Id == templateId);
+        if (template != null)
+        {
+            template.IsActive = true;
+            await Db.SaveChangesAsync();
+            // Refresh data
+            await OnInitializedAsync();
+        }
+    }
+}

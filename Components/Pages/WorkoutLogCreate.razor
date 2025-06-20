@@ -32,25 +32,25 @@
     </div>
 
     <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Mesocycle (Optional)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Template (Optional)</label>
         <div class="flex flex-col md:flex-row gap-6">
             <div class="flex-1">
-                <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="selectedMesocycleId">
-                    <option value="">-- No Mesocycle --</option>
-                    @foreach (var mesocycle in mesocycles)
+                <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="selectedTemplateId">
+                    <option value="">-- No Template --</option>
+                    @foreach (var template in templates)
                     {
-                        <option value="@mesocycle.Id">@mesocycle.Name @(mesocycle.IsActive ? "(Active)" : "")</option>
+                        <option value="@template.Id">@template.Name @(template.IsActive ? "(Active)" : "")</option>
                     }
                 </InputSelect>
             </div>
             <div class="flex-1">
-                @if (selectedMesocycleId.HasValue)
+                @if (selectedTemplateId.HasValue)
                 {
-                    <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.MesocycleWeek">
+                    <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.WorkoutTemplateWeek">
                         <option value="">-- Select Week --</option>
-                        @for (int i = 1; i <= selectedMesocycle?.NumberOfWeeks; i++)
+                        @for (int i = 1; i <= selectedTemplate?.NumberOfWeeks; i++)
                         {
-                            <option value="@i">Week @i @(i == selectedMesocycle?.NumberOfWeeks ? "(Deload)" : "")</option>
+                            <option value="@i">Week @i @(i == selectedTemplate?.NumberOfWeeks ? "(Deload)" : "")</option>
                         }
                     </InputSelect>
                 }
@@ -64,44 +64,44 @@
 @code {
     private WorkoutLog log = new WorkoutLog();
     private List<Workout> workouts = new List<Workout>();
-    private List<Mesocycle> mesocycles = new List<Mesocycle>();
-    private int? selectedMesocycleId;
-    private Mesocycle? selectedMesocycle;
+    private List<WorkoutTemplate> templates = new List<WorkoutTemplate>();
+    private int? selectedTemplateId;
+    private WorkoutTemplate? selectedTemplate;
 
     protected override async Task OnInitializedAsync()
     {
         workouts = await Db.Workouts.ToListAsync();
-        mesocycles = await Db.Mesocycles.Where(m => m.IsActive).ToListAsync();
+        templates = await Db.WorkoutTemplates.Where(m => m.IsActive).ToListAsync();
     }
 
-    private int? _lastMesocycleId;
+    private int? _lastTemplateId;
     
     protected override void OnAfterRender(bool firstRender)
     {
-        if (selectedMesocycleId != _lastMesocycleId)
+        if (selectedTemplateId != _lastTemplateId)
         {
-            if (selectedMesocycleId.HasValue)
+            if (selectedTemplateId.HasValue)
             {
-                selectedMesocycle = mesocycles.FirstOrDefault(m => m.Id == selectedMesocycleId.Value);
+                selectedTemplate = templates.FirstOrDefault(m => m.Id == selectedTemplateId.Value);
             }
             else
             {
-                selectedMesocycle = null;
+                selectedTemplate = null;
             }
-            log.MesocycleWeek = null; // Reset week selection when mesocycle changes
-            _lastMesocycleId = selectedMesocycleId;
+            log.WorkoutTemplateWeek = null; // Reset week selection when template changes
+            _lastTemplateId = selectedTemplateId;
         }
     }
 
     private async Task HandleValidSubmit()
     {
-        if (selectedMesocycleId.HasValue)
+        if (selectedTemplateId.HasValue)
         {
-            log.MesocycleId = selectedMesocycleId.Value;
+            log.WorkoutTemplateId = selectedTemplateId.Value;
         }
         else
         {
-            log.MesocycleId = null;
+            log.WorkoutTemplateId = null;
         }
         Db.WorkoutLogs.Add(log);
         await Db.SaveChangesAsync();

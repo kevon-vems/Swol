@@ -16,31 +16,31 @@
 }
 else
 {
-    @if (activeMesocycle == null)
+    @if (activeTemplate == null)
     {
         <div class="bg-blue-100 border border-blue-300 text-blue-800 rounded-lg p-6 mb-6">
-            <h4 class="text-lg font-semibold mb-2">No Active Mesocycle</h4>
-            <p class="mb-4">You don't have an active mesocycle. Start a new training cycle to track your progress.</p>
-            <a href="/mesocycles/create" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition">Create Mesocycle</a>
+            <h4 class="text-lg font-semibold mb-2">No Active Template</h4>
+            <p class="mb-4">You don't have an active template. Start a new training plan to track your progress.</p>
+            <a href="/templates/form" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition">Create Template</a>
         </div>
     }
     else
     {
         <div class="bg-white rounded-lg shadow mb-8">
             <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                <h3 class="text-xl font-semibold m-0">Active Mesocycle: @activeMesocycle.Name</h3>
-                <a href="/mesocycles/form/@activeMesocycle.Id" class="inline-block text-sm border border-gray-400 text-gray-700 hover:bg-gray-100 px-3 py-1 rounded transition">Edit</a>
+                <h3 class="text-xl font-semibold m-0">Active Template: @activeTemplate.Name</h3>
+                <a href="/templates/form/@activeTemplate.Id" class="inline-block text-sm border border-gray-400 text-gray-700 hover:bg-gray-100 px-3 py-1 rounded transition">Edit</a>
             </div>
             <div class="px-6 py-4">
                 <div class="flex flex-col md:flex-row gap-6">
                     <div class="md:w-1/2">
                         <p>
-                            <strong>Mesocycle:</strong> @activeMesocycle.Name
+                            <strong>Template:</strong> @activeTemplate.Name
                         </p>
                         <p>
-                            <strong>Start:</strong> @activeMesocycle.StartDate.ToShortDateString()
+                            <strong>Start:</strong> @activeTemplate.StartDate.ToShortDateString()
                         </p>
-                        <p><strong>Weeks:</strong> @activeMesocycle.NumberOfWeeks</p>
+                        <p><strong>Weeks:</strong> @activeTemplate.NumberOfWeeks</p>
                     </div>
                     <div class="md:w-1/2">
                         <div class="mt-3">
@@ -87,7 +87,7 @@ else
                                 {
                                     <tr class="border-b last:border-0">
                                         <td class="py-2 px-3">@log.StartTime.ToShortDateString()</td>
-                                        <td class="py-2 px-3">Week @log.MesocycleWeek</td>
+                                        <td class="py-2 px-3">Week @log.WorkoutTemplateWeek</td>
                                         <td class="py-2 px-3">
                                             @if (log.EndTime.HasValue)
                                             {
@@ -120,35 +120,35 @@ else
 
 @code {
     private bool isLoading = true;
-    private Mesocycle? activeMesocycle;
+    private WorkoutTemplate? activeTemplate;
     private WorkoutLog? todaysWorkoutLog;
     private List<WorkoutLog> recentWorkoutLogs = new();
 
     protected override async Task OnInitializedAsync()
     {
-        activeMesocycle = await Db.Mesocycles
+        activeTemplate = await Db.WorkoutTemplates
             .FirstOrDefaultAsync(m => m.IsActive);
 
-        if (activeMesocycle != null)
+        if (activeTemplate != null)
         {
             // Get recent workout logs for this mesocycle
             recentWorkoutLogs = await Db.WorkoutLogs
                 .Include(wl => wl.ExerciseSets)
-                .Where(wl => wl.MesocycleId == activeMesocycle.Id)
+                .Where(wl => wl.WorkoutTemplateId == activeTemplate.Id)
                 .OrderByDescending(wl => wl.StartTime)
                 .Take(5)
                 .ToListAsync();
 
             // Get all days in the mesocycle, ordered by week/day
             var allDays = await Db.MesocycleDays
-                .Where(md => md.MesocycleId == activeMesocycle.Id)
+                .Where(md => md.WorkoutTemplateId == activeTemplate.Id)
                 .OrderBy(md => md.WeekNumber)
                 .ThenBy(md => md.DayNumber)
                 .ToListAsync();
 
             // Get all completed or in-progress logs
             var completedLogs = await Db.WorkoutLogs
-                .Where(wl => wl.MesocycleId == activeMesocycle.Id)
+                .Where(wl => wl.WorkoutTemplateId == activeTemplate.Id)
                 .ToListAsync();
 
             // Find the first day without a log
@@ -162,7 +162,7 @@ else
                     .FirstOrDefault(log => log.MesocycleDayId == nextDay.Id && log.EndTime == null);
 
                 // Redirect to the current day workout page
-                Nav.NavigateTo($"/mesocycles/{activeMesocycle.Id}/weeks/{nextDay.WeekNumber}/days/{nextDay.DayNumber}");
+                Nav.NavigateTo($"/templates/{activeTemplate.Id}/weeks/{nextDay.WeekNumber}/days/{nextDay.DayNumber}");
                 return;
             }
         }

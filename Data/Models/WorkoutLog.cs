@@ -13,6 +13,10 @@ public class WorkoutLog
     // Week number within the Mesocycle (if applicable)
     public int? MesocycleWeek { get; set; }
     
+    // Reference to the specific MesocycleDay (if applicable)
+    public int? MesocycleDayId { get; set; }
+    public MesocycleDay? MesocycleDay { get; set; }
+    
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public string? Notes { get; set; }

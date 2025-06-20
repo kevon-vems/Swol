@@ -6,7 +6,7 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<h1>Workout Dashboard</h1>
+<h1 class="text-3xl font-bold mb-6">Workout Dashboard</h1>
 
 @if (isLoading)
 {
@@ -16,22 +16,22 @@ else
 {
     @if (activeMesocycle == null)
     {
-        <div class="alert alert-info">
-            <h4>No Active Mesocycle</h4>
-            <p>You don't have an active mesocycle. Start a new training cycle to track your progress.</p>
-            <a href="/mesocycles/create" class="btn btn-primary">Create Mesocycle</a>
+        <div class="bg-blue-100 border border-blue-300 text-blue-800 rounded-lg p-6 mb-6">
+            <h4 class="text-lg font-semibold mb-2">No Active Mesocycle</h4>
+            <p class="mb-4">You don't have an active mesocycle. Start a new training cycle to track your progress.</p>
+            <a href="/mesocycles/create" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition">Create Mesocycle</a>
         </div>
     }
     else
     {
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="m-0">Active Mesocycle: @activeMesocycle.Name</h3>
-                <a href="/mesocycles/edit/@activeMesocycle.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <div class="bg-white rounded-lg shadow mb-8">
+            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <h3 class="text-xl font-semibold m-0">Active Mesocycle: @activeMesocycle.Name</h3>
+                <a href="/mesocycles/form/@activeMesocycle.Id" class="inline-block text-sm border border-gray-400 text-gray-700 hover:bg-gray-100 px-3 py-1 rounded transition">Edit</a>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
+            <div class="px-6 py-4">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/2">
                         <p>
                             <strong>Mesocycle:</strong> @activeMesocycle.Name
                         </p>
@@ -40,19 +40,19 @@ else
                         </p>
                         <p><strong>Weeks:</strong> @activeMesocycle.NumberOfWeeks</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="md:w-1/2">
                         <div class="mt-3">
                             @if (todaysWorkoutLog != null)
                             {
-                                <div class="alert alert-success">
-                                    <h5>Today's Workout</h5>
-                                    <p>Started at: @todaysWorkoutLog.StartTime.ToShortTimeString()</p>
-                                    <a href="/workoutlogs/edit/@todaysWorkoutLog.Id" class="btn btn-primary">Continue Workout</a>
+                                <div class="bg-green-100 border border-green-300 text-green-800 rounded-lg p-4 mb-2">
+                                    <h5 class="text-base font-semibold mb-1">Today's Workout</h5>
+                                    <p class="mb-3">Started at: @todaysWorkoutLog.StartTime.ToShortTimeString()</p>
+                                    <a href="/workoutlogs/edit/@todaysWorkoutLog.Id" class="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition">Continue Workout</a>
                                 </div>
                             }
                             else
                             {
-                                <a href="#" class="btn btn-lg btn-success w-100 disabled">
+                                <a href="#" class="inline-block bg-green-400 text-white font-medium py-3 px-4 rounded w-full opacity-60 cursor-not-allowed text-center text-lg">
                                     Start Today's Workout (feature coming soon)
                                 </a>
                             }
@@ -64,47 +64,49 @@ else
 
         @if (recentWorkoutLogs.Any())
         {
-            <div class="card">
-                <div class="card-header">
-                    <h4>Recent Workouts</h4>
+            <div class="bg-white rounded-lg shadow">
+                <div class="border-b border-gray-200 px-6 py-4">
+                    <h4 class="text-lg font-semibold">Recent Workouts</h4>
                 </div>
-                <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Week</th>
-                                <th>Duration</th>
-                                <th>Sets</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var log in recentWorkoutLogs)
-                            {
+                <div class="px-6 py-4">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-left text-sm">
+                            <thead>
                                 <tr>
-                                    <td>@log.StartTime.ToShortDateString()</td>
-                                    <td>Week @log.MesocycleWeek</td>
-                                    <td>
-                                        @if (log.EndTime.HasValue)
-                                        {
-                                            <span>@((int)(log.EndTime.Value - log.StartTime).TotalMinutes) min</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">In progress</span>
-                                        }
-                                    </td>
-                                    <td>@log.ExerciseSets.Count</td>
-                                    <td>
-                                        <a href="/workoutlogs/edit/@log.Id" class="btn btn-sm btn-outline-secondary">View</a>
-                                    </td>
+                                    <th class="py-2 px-3 font-semibold text-gray-700">Date</th>
+                                    <th class="py-2 px-3 font-semibold text-gray-700">Week</th>
+                                    <th class="py-2 px-3 font-semibold text-gray-700">Duration</th>
+                                    <th class="py-2 px-3 font-semibold text-gray-700">Sets</th>
+                                    <th class="py-2 px-3"></th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <div class="text-end">
-                        <a href="/workoutlogs" class="btn btn-outline-primary">View All Workouts</a>
+                            </thead>
+                            <tbody>
+                                @foreach (var log in recentWorkoutLogs)
+                                {
+                                    <tr class="border-b last:border-0">
+                                        <td class="py-2 px-3">@log.StartTime.ToShortDateString()</td>
+                                        <td class="py-2 px-3">Week @log.MesocycleWeek</td>
+                                        <td class="py-2 px-3">
+                                            @if (log.EndTime.HasValue)
+                                            {
+                                                <span>@((int)(log.EndTime.Value - log.StartTime).TotalMinutes) min</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-gray-400">In progress</span>
+                                            }
+                                        </td>
+                                        <td class="py-2 px-3">@log.ExerciseSets.Count</td>
+                                        <td class="py-2 px-3">
+                                            <a href="/workoutlogs/edit/@log.Id" class="inline-block text-sm border border-gray-400 text-gray-700 hover:bg-gray-100 px-3 py-1 rounded transition">View</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-end mt-4">
+                        <a href="/workoutlogs" class="inline-block border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded transition">View All Workouts</a>
                     </div>
                 </div>
             </div>
@@ -117,20 +119,14 @@ else
     private Mesocycle? activeMesocycle;
     private WorkoutLog? todaysWorkoutLog;
     private List<WorkoutLog> recentWorkoutLogs = new();
-    
+
     protected override async Task OnInitializedAsync()
     {
         activeMesocycle = await Db.Mesocycles
             .FirstOrDefaultAsync(m => m.IsActive);
-            
+
         if (activeMesocycle != null)
         {
-            // Get today's workout log if it exists
-            todaysWorkoutLog = await Db.WorkoutLogs
-                .Where(wl => wl.MesocycleId == activeMesocycle.Id && 
-                       wl.StartTime.Date == DateTime.Today)
-                .FirstOrDefaultAsync();
-                
             // Get recent workout logs for this mesocycle
             recentWorkoutLogs = await Db.WorkoutLogs
                 .Include(wl => wl.ExerciseSets)
@@ -138,9 +134,35 @@ else
                 .OrderByDescending(wl => wl.StartTime)
                 .Take(5)
                 .ToListAsync();
+
+            // Get all days in the mesocycle, ordered by week/day
+            var allDays = await Db.MesocycleDays
+                .Where(md => md.MesocycleId == activeMesocycle.Id)
+                .OrderBy(md => md.WeekNumber)
+                .ThenBy(md => md.DayNumber)
+                .ToListAsync();
+
+            // Get all completed or in-progress logs
+            var completedLogs = await Db.WorkoutLogs
+                .Where(wl => wl.MesocycleId == activeMesocycle.Id)
+                .ToListAsync();
+
+            // Find the first day without a log
+            var nextDay = allDays.FirstOrDefault(day =>
+                !completedLogs.Any(log => log.MesocycleDayId == day.Id));
+
+            if (nextDay != null)
+            {
+                // Optionally, find an in-progress log for this day
+                todaysWorkoutLog = completedLogs
+                    .FirstOrDefault(log => log.MesocycleDayId == nextDay.Id && log.EndTime == null);
+
+                // Redirect to the current day workout page
+                Nav.NavigateTo($"/mesocycles/{activeMesocycle.Id}/weeks/{nextDay.WeekNumber}/days/{nextDay.DayNumber}");
+                return;
+            }
         }
-        
+
         isLoading = false;
     }
 }
-

@@ -70,6 +70,13 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(wde => wde.ExerciseId);
 
+        // WorkoutLog -> MesocycleDay (new relationship)
+        modelBuilder.Entity<WorkoutLog>()
+            .HasOne(wl => wl.MesocycleDay)
+            .WithMany()
+            .HasForeignKey(wl => wl.MesocycleDayId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Seed();
     }
 }

@@ -6,9 +6,9 @@
 
 <PageTitle>Workout Logs</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Workout Logs</h1>
-    <a class="btn btn-primary" href="/workoutlogs/create">Add Workout Log</a>
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+    <h1 class="text-3xl font-bold">Workout Logs</h1>
+    <a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded" href="/workoutlogs/create">Add Workout Log</a>
 </div>
 
 @if (logs == null)
@@ -17,48 +17,48 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped">
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Workout</th>
-                    <th>Mesocycle</th>
-                    <th>Duration</th>
-                    <th>Sets</th>
-                    <th></th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Date</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Workout</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Mesocycle</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Duration</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Sets</th>
+                    <th class="px-4 py-2 border-b"></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var log in logs)
                 {
-                    <tr>
-                        <td>@log.StartTime.ToShortDateString()</td>
-                        <td>@log.Workout?.Name</td>
-                        <td>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2">@log.StartTime.ToShortDateString()</td>
+                        <td class="px-4 py-2">@log.Workout?.Name</td>
+                        <td class="px-4 py-2">
                             @if (log.Mesocycle != null)
                             {
                                 <span>@log.Mesocycle.Name - Week @log.MesocycleWeek</span>
                             }
                             else
                             {
-                                <span class="text-muted">-</span>
+                                <span class="text-gray-400">-</span>
                             }
                         </td>
-                        <td>
+                        <td class="px-4 py-2">
                             @if (log.EndTime.HasValue)
                             {
                                 <span>@((int)(log.EndTime.Value - log.StartTime).TotalMinutes) min</span>
                             }
                             else
                             {
-                                <span class="text-warning">In progress</span>
+                                <span class="text-yellow-600 font-semibold">In progress</span>
                             }
                         </td>
-                        <td>@log.ExerciseSets.Count</td>
-                        <td>
-                            <a class="btn btn-sm btn-outline-secondary" href="/workoutlogs/edit/@log.Id">Edit</a>
-                            <a class="btn btn-sm btn-outline-danger" href="/workoutlogs/delete/@log.Id">Delete</a>
+                        <td class="px-4 py-2">@log.ExerciseSets.Count</td>
+                        <td class="px-4 py-2 space-x-2">
+                            <a class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded text-sm" href="/workoutlogs/edit/@log.Id">Edit</a>
+                            <a class="inline-block bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded text-sm" href="/workoutlogs/delete/@log.Id">Delete</a>
                         </td>
                     </tr>
                 }

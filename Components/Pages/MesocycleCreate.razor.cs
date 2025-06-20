@@ -9,6 +9,7 @@ public partial class MesocycleCreate : ComponentBase
 {
     [Inject] public Data.ApplicationDbContext Db { get; set; } = default!;
     [Inject] public NavigationManager Nav { get; set; } = default!;
+    [Parameter] public int? Id { get; set; }
 
     private Mesocycle mesocycle = new Mesocycle();
     private List<Exercise> allExercises = new();
@@ -26,21 +27,40 @@ public partial class MesocycleCreate : ComponentBase
                 .ThenInclude(emg => emg.MuscleGroup)
             .OrderBy(e => e.Name)
             .ToListAsync();
-        // Start with two days (Monday, Tuesday)
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Sunday });
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Monday });
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Tuesday });
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Wednesday });
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Thursday });
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Friday});
-        mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Saturday });
-        foreach (var d in mesocycle.Days)
-            newExerciseDayId[d.DayOfWeek] = 0;
+
+        if (Id.HasValue)
+        {
+            // Edit mode: load existing mesocycle with related data
+            mesocycle = await Db.Mesocycles
+                .Include(m => m.Days)
+                    .ThenInclude(d => d.Exercises)
+                        .ThenInclude(e => e.Exercise)
+                            .ThenInclude(ex => ex.ExerciseMuscleGroups)
+                                .ThenInclude(emg => emg.MuscleGroup)
+                .FirstOrDefaultAsync(m => m.Id == Id.Value)
+                ?? new Mesocycle();
+
+            // Initialize newExerciseDayId for loaded days
+            foreach (var d in mesocycle.Days)
+                newExerciseDayId[d.DayOfWeek] = 0;
+        }
+        else
+        {
+            // Create mode: initialize with all days
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Sunday });
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Monday });
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Tuesday });
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Wednesday });
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Thursday });
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Friday });
+            mesocycle.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Saturday });
+            foreach (var d in mesocycle.Days)
+                newExerciseDayId[d.DayOfWeek] = 0;
+        }
     }
 
     private void AddDay()
     {
-        // Add the first available DayOfWeek not already used
         var available = Enum.GetValues<DayOfWeek>().Except(mesocycle.Days.Select(d => d.DayOfWeek)).ToList();
         if (!available.Any()) return;
         var day = new MesocycleDay { DayOfWeek = available.First() };
@@ -71,7 +91,7 @@ public partial class MesocycleCreate : ComponentBase
             {
                 selectedExerciseId[day.DayOfWeek] = exId;
                 AddExerciseToDay(day);
-                selectedExerciseId[day.DayOfWeek] = 0; // Reset selection
+                selectedExerciseId[day.DayOfWeek] = 0;
             }
             StateHasChanged();
         }
@@ -101,7 +121,7 @@ public partial class MesocycleCreate : ComponentBase
             selectedMuscleGroup[day] = mg;
         else
             selectedMuscleGroup[day] = null;
-        selectedExerciseId[day] = 0; // Reset exercise selection
+        selectedExerciseId[day] = 0;
     }
     private void RemoveSelectedMuscleGroup(DayOfWeek dayOfWeek)
     {
@@ -147,11 +167,9 @@ public partial class MesocycleCreate : ComponentBase
     {
         if (value is null) return;
         if (!Enum.TryParse<DayOfWeek>(value.ToString(), out var newDayOfWeek)) return;
-        if (mesocycle.Days.Any(d => d != day && d.DayOfWeek == newDayOfWeek)) return; // Prevent duplicates
-        // Remove old mapping
+        if (mesocycle.Days.Any(d => d != day && d.DayOfWeek == newDayOfWeek)) return;
         newExerciseDayId.Remove(day.DayOfWeek);
         day.DayOfWeek = newDayOfWeek;
-        // Add new mapping
         if (!newExerciseDayId.ContainsKey(newDayOfWeek))
             newExerciseDayId[newDayOfWeek] = 0;
         StateHasChanged();
@@ -160,7 +178,16 @@ public partial class MesocycleCreate : ComponentBase
     private async Task HandleSubmit()
     {
         mesocycle.IsActive = true;
-        Db.Mesocycles.Add(mesocycle);
+
+        if (Id.HasValue)
+        {
+            Db.Mesocycles.Update(mesocycle);
+        }
+        else
+        {
+            Db.Mesocycles.Add(mesocycle);
+        }
+
         await Db.SaveChangesAsync();
         Nav.NavigateTo("/mesocycles");
     }

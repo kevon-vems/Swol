@@ -6,16 +6,16 @@
 
 <PageTitle>Edit Workout Log</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Edit Workout Log</h1>
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+    <h1 class="text-3xl font-bold">Edit Workout Log</h1>
     <div>
         @if (log?.EndTime == null)
         {
-            <button type="button" class="btn btn-success" @onclick="CompleteWorkout">Complete Workout</button>
+            <button type="button" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded" @onclick="CompleteWorkout">Complete Workout</button>
         }
         else
         {
-            <span class="badge bg-success p-2">Completed</span>
+            <span class="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-2 rounded">Completed</span>
         }
     </div>
 </div>
@@ -26,14 +26,14 @@
 }
 else
 {
-    <EditForm Model="log" OnValidSubmit="HandleValidSubmit">
+    <EditForm Model="@log" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
         
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label class="form-label">Workout</label>
-                <InputSelect class="form-control" @bind-Value="log.WorkoutId">
+        <div class="flex flex-col md:flex-row gap-6 mb-6">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Workout</label>
+                <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.WorkoutId">
                     <option value="">-- Select Workout --</option>
                     @foreach (var workout in workouts)
                     {
@@ -41,17 +41,17 @@ else
                     }
                 </InputSelect>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Start Time</label>
-                <InputDate class="form-control" @bind-Value="log.StartTime" />
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                <InputDate class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.StartTime" />
             </div>
         </div>
         
-        <div class="mb-3">
-            <label class="form-label">Mesocycle (Optional)</label>
-            <div class="row">
-                <div class="col-md-6">
-                    <InputSelect class="form-control" @bind-Value="selectedMesocycleId">
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mesocycle (Optional)</label>
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="flex-1">
+                    <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="selectedMesocycleId">
                         <option value="">-- No Mesocycle --</option>
                         @foreach (var mesocycle in mesocycles)
                         {
@@ -59,10 +59,10 @@ else
                         }
                     </InputSelect>
                 </div>
-                <div class="col-md-6">
+                <div class="flex-1">
                     @if (selectedMesocycleId.HasValue)
                     {
-                        <InputSelect class="form-control" @bind-Value="log.MesocycleWeek">
+                        <InputSelect class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.MesocycleWeek">
                             <option value="">-- Select Week --</option>
                             @for (int i = 1; i <= selectedMesocycle?.NumberOfWeeks; i++)
                             {
@@ -74,38 +74,38 @@ else
             </div>
         </div>
         
-        <div class="mb-3">
-            <label class="form-label">Notes</label>
-            <InputTextArea class="form-control" @bind-Value="log.Notes" rows="3" />
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <InputTextArea class="block w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" @bind-Value="log.Notes" rows="3" />
         </div>
         
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a class="btn btn-secondary ms-2" href="/workoutlogs">Cancel</a>
+        <button type="submit" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Save</button>
+        <a class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded ml-2" href="/workoutlogs">Cancel</a>
     </EditForm>
     
-    <hr />
+    <hr class="my-8" />
     
-    <h3>Exercise Sets</h3>
+    <h3 class="text-xl font-semibold mb-4">Exercise Sets</h3>
     
     @if (!log.ExerciseSets.Any())
     {
-        <div class="alert alert-info">
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded">
             No exercise sets recorded yet. Add some below.
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-striped">
+        <div class="overflow-x-auto mb-6">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
                 <thead>
                     <tr>
-                        <th>Exercise</th>
-                        <th>Set</th>
-                        <th>Reps</th>
-                        <th>Weight (kg)</th>
-                        <th>Duration</th>
-                        <th>Notes</th>
-                        <th></th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Exercise</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Set</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Reps</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Weight (kg)</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Duration</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Notes</th>
+                        <th class="px-4 py-2 border-b"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -114,24 +114,22 @@ else
                         var exercise = exercises.FirstOrDefault(e => e.Id == exerciseGroup.Key);
                         var sets = exerciseGroup.OrderBy(es => es.SetNumber).ToList();
                         
-                        <tr class="table-light">
-                            <td colspan="7">
-                                <strong>@exercise?.Name</strong>
-                            </td>
+                        <tr class="bg-gray-50">
+                            <td colspan="7" class="px-4 py-2 font-semibold text-gray-700">@exercise?.Name</td>
                         </tr>
                         
                         @foreach (var set in sets)
                         {
                             <tr>
                                 <td></td>
-                                <td>@set.SetNumber</td>
-                                <td>@set.Reps</td>
-                                <td>@set.WeightInKg</td>
-                                <td>@(set.Duration?.ToString(@"mm\:ss") ?? "-")</td>
-                                <td>@set.Notes</td>
-                                <td>
-                                    <a href="/exercisesets/edit/@set.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                    <a href="/exercisesets/delete/@set.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                <td class="px-4 py-2">@set.SetNumber</td>
+                                <td class="px-4 py-2">@set.Reps</td>
+                                <td class="px-4 py-2">@set.WeightInKg</td>
+                                <td class="px-4 py-2">@(set.Duration?.ToString(@"mm\:ss") ?? "-")</td>
+                                <td class="px-4 py-2">@set.Notes</td>
+                                <td class="px-4 py-2 space-x-2">
+                                    <a href="/exercisesets/edit/@set.Id" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded text-sm">Edit</a>
+                                    <a href="/exercisesets/delete/@set.Id" class="inline-block bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded text-sm">Delete</a>
                                 </td>
                             </tr>
                         }
@@ -141,8 +139,8 @@ else
         </div>
     }
     
-    <div class="mb-4">
-        <a href="/exercisesets/create?workoutLogId=@log.Id" class="btn btn-primary">Add Exercise Set</a>
+    <div class="mb-8">
+        <a href="/exercisesets/create?workoutLogId=@log.Id" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Add Exercise Set</a>
     </div>
 }
 

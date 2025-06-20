@@ -5,9 +5,9 @@
 
 <PageTitle>Add Workout</PageTitle>
 
-<h1>Add Workout</h1>
+<h1 class="text-2xl font-bold mb-6">Add Workout</h1>
 
-<div class="alert alert-info">
+<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded">
     <strong>What is a Workout?</strong><br />
     A Workout in this application is a collection of exercises performed together as a session. Each Workout can include multiple exercises, their order, sets, reps, and weights. Workouts are designed to be repeated and tracked over time, and can be used as part of a larger training plan (Mesocycle).
     <br /><br />
@@ -15,7 +15,7 @@
     <em>Name:</em> Push Day<br />
     <em>Description:</em> Upper body workout focused on chest, shoulders, and triceps.<br />
     <em>Exercises:</em>
-    <ul>
+    <ul class="list-disc list-inside ml-4">
         <li>Barbell Bench Press: 4 sets x 8 reps @@ 60kg</li>
         <li>Overhead Press: 3 sets x 10 reps @@ 35kg</li>
         <li>Triceps Pushdown: 3 sets x 12 reps @@ 25kg</li>
@@ -24,17 +24,17 @@
 
 <EditForm Model="workout" OnValidSubmit="HandleValidSubmit" FormName="WorkoutCreateForm">
     <DataAnnotationsValidator />
-    <ValidationSummary />
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <InputText class="form-control" @bind-Value="workout.Name" />
+    <ValidationSummary class="mb-4 text-red-600" />
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <InputText class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="workout.Name" />
     </div>
-    <div class="mb-3">
-        <label class="form-label">Description</label>
-        <InputTextArea class="form-control" @bind-Value="workout.Description" />
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <InputTextArea class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="workout.Description" />
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a class="btn btn-secondary ms-2" href="/workouts">Cancel</a>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">Save</button>
+    <a class="ml-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow" href="/workouts">Cancel</a>
 </EditForm>
 
 @code {

@@ -7,16 +7,16 @@
 
 <PageTitle>Add Exercise Set</PageTitle>
 
-<h1>Add Exercise Set</h1>
+<h1 class="text-2xl font-bold mb-6">Add Exercise Set</h1>
 
 <EditForm Model="@set" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    <ValidationSummary class="mb-4 text-red-600" />
     
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label class="form-label">Workout Log</label>
-            <InputSelect class="form-control" @bind-Value="set.WorkoutLogId">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Workout Log</label>
+            <InputSelect class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="set.WorkoutLogId">
                 <option value="">-- Select Workout Log --</option>
                 @foreach (var log in workoutLogs)
                 {
@@ -24,9 +24,9 @@
                 }
             </InputSelect>
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Exercise</label>
-            <InputSelect class="form-control" @bind-Value="set.ExerciseId">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Exercise</label>
+            <InputSelect class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="set.ExerciseId">
                 <option value="">-- Select Exercise --</option>
                 @foreach (var exercise in exercises)
                 {
@@ -36,16 +36,18 @@
         </div>
     </div>
     
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <label class="form-label">Set Number</label>
-            <InputNumber class="form-control" @bind-Value="set.SetNumber" />
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Set Number</label>
+            <InputNumber class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="set.SetNumber" />
         </div>
-        <div class="col-md-4">
-            <label class="form-label">Reps</label>
-            <InputNumber class="form-control" @bind-Value="set.Reps" />
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Reps</label>
+            <InputNumber class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="set.Reps" />
         </div>
     </div>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">Save</button>
+    <a class="ml-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow" href="/exercisesets">Cancel</a>
 </EditForm>
 
 @code {

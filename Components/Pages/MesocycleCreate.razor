@@ -1,10 +1,10 @@
-@page "/mesocycles/create"
+@page "/mesocycles/form/{Id:int?}"
 @using Swol.Data.Models
 @using Microsoft.EntityFrameworkCore
 @using Swol.Enums
 
 <div class="justify-self-start">
-    <button type="submit" form="mesocycleForm" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Create Mesocycle</button>
+    <button type="submit" form="mesocycleForm" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">@(mesocycle.Id > 0 ? "Save" : "Create")</button>
 </div>
 <div class="pt-2">
     <div>

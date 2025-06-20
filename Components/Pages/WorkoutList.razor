@@ -5,9 +5,9 @@
 
 <PageTitle>Workouts</PageTitle>
 
-<h1>Workouts</h1>
+<h1 class="text-3xl font-bold mb-6">Workouts</h1>
 
-<a class="btn btn-primary mb-3" href="/workouts/create">Add Workout</a>
+<a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mb-6" href="/workouts/create">Add Workout</a>
 
 @if (workouts == null)
 {
@@ -15,28 +15,30 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var workout in workouts)
-            {
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+            <thead>
                 <tr>
-                    <td>@workout.Name</td>
-                    <td>@workout.Description</td>
-                    <td>
-                        <a class="btn btn-sm btn-secondary" href="/workouts/edit/@workout.Id">Edit</a>
-                        <a class="btn btn-sm btn-danger" href="/workouts/delete/@workout.Id">Delete</a>
-                    </td>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Description</th>
+                    <th class="px-6 py-3 border-b"></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var workout in workouts)
+                {
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap border-b">@workout.Name</td>
+                        <td class="px-6 py-4 whitespace-nowrap border-b">@workout.Description</td>
+                        <td class="px-6 py-4 whitespace-nowrap border-b space-x-2">
+                            <a class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded text-sm" href="/workouts/edit/@workout.Id">Edit</a>
+                            <a class="inline-block bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded text-sm" href="/workouts/delete/@workout.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

@@ -4,9 +4,9 @@
 
 <PageTitle>Exercises</PageTitle>
 
-<h1>Exercises</h1>
+<h1 class="text-2xl font-bold mb-6">Exercises</h1>
 
-<a class="btn btn-primary mb-3" href="/exercises/create">Add Exercise</a>
+<a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow mb-6" href="/exercises/create">Add Exercise</a>
 
 @if (exercises == null)
 {
@@ -14,30 +14,30 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Muscle Groups</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var exercise in exercises)
-            {
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 bg-white rounded shadow-sm">
+            <thead class="bg-gray-100">
                 <tr>
-                    <td>@exercise.Name</td>
-                    <td>
-                        @string.Join(", ", exercise.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name))
-                    </td>
-                    <td>
-                        <a class="btn btn-sm btn-primary me-1" href="/exercises/edit/@exercise.Id">Edit</a>
-                        <a class="btn btn-sm btn-danger" href="/exercises/delete/@exercise.Id">Delete</a>
-                    </td>
+                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
+                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Muscle Groups</th>
+                    <th class="px-4 py-2"></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var exercise in exercises)
+                {
+                    <tr class="border-t border-gray-200 hover:bg-gray-50">
+                        <td class="px-4 py-2">@exercise.Name</td>
+                        <td class="px-4 py-2">@string.Join(", ", exercise.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name))</td>
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            <a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded shadow text-sm mr-2" href="/exercises/edit/@exercise.Id">Edit</a>
+                            <a class="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded shadow text-sm" href="/exercises/delete/@exercise.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Swol.Data.Models;
+using Swol.Data.Models.Config;
 
 namespace Swol.Data;
 

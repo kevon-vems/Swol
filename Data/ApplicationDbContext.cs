@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Swol.Data.Models;
+using Swol.Data.Models.Config;
+using Swol.Data.Models.Template;
+using Swol.Data.Models.Work;
 
 namespace Swol.Data;
 
@@ -14,13 +17,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<Workout> Workouts => Set<Workout>();
     public DbSet<WorkoutDay> WorkoutDays => Set<WorkoutDay>();
     public DbSet<WorkoutDayExercise> WorkoutDayExercises => Set<WorkoutDayExercise>();
-    public DbSet<WorkoutLog> WorkoutLogs => Set<WorkoutLog>();
-    public DbSet<ExerciseSet> ExerciseSets => Set<ExerciseSet>();
+    public DbSet<WorkoutDayExerciseSet> WorkoutDayExerciseSets => Set<WorkoutDayExerciseSet>();
     public DbSet<MuscleGroup> MuscleGroups => Set<MuscleGroup>();
     public DbSet<ExerciseMuscleGroup> ExerciseMuscleGroups => Set<ExerciseMuscleGroup>();
     public DbSet<WorkoutTemplate> WorkoutTemplates => Set<WorkoutTemplate>();
-    public DbSet<MesocycleDay> MesocycleDays => Set<MesocycleDay>();
-    public DbSet<MesocycleDayExercise> MesocycleDayExercises => Set<MesocycleDayExercise>();
+    public DbSet<WorkoutTemplateDay> WorkoutTemplateDays => Set<WorkoutTemplateDay>();
+    public DbSet<WorkoutTemplateDayExercise> WorkoutTemplateDayExercises => Set<WorkoutTemplateDayExercise>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,17 +41,17 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(emg => emg.MuscleGroupId);
 
         // WorkoutTemplate -> Days
-        modelBuilder.Entity<MesocycleDay>()
+        modelBuilder.Entity<WorkoutTemplateDay>()
             .HasOne(md => md.WorkoutTemplate)
             .WithMany(m => m.Days)
             .HasForeignKey(md => md.WorkoutTemplateId);
 
-        // MesocycleDay -> Exercises
-        modelBuilder.Entity<MesocycleDayExercise>()
-            .HasOne(mde => mde.MesocycleDay)
+        // WorkoutTemplateDay -> Exercises
+        modelBuilder.Entity<WorkoutTemplateDayExercise>()
+            .HasOne(mde => mde.WorkoutTemplateDay)
             .WithMany(md => md.Exercises)
-            .HasForeignKey(mde => mde.MesocycleDayId);
-        modelBuilder.Entity<MesocycleDayExercise>()
+            .HasForeignKey(mde => mde.WorkoutTemplateDayId);
+        modelBuilder.Entity<WorkoutTemplateDayExercise>()
             .HasOne(mde => mde.Exercise)
             .WithMany()
             .HasForeignKey(mde => mde.ExerciseId);
@@ -70,12 +72,16 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(wde => wde.ExerciseId);
 
-        // WorkoutLog -> MesocycleDay (new relationship)
-        modelBuilder.Entity<WorkoutLog>()
-            .HasOne(wl => wl.MesocycleDay)
-            .WithMany()
-            .HasForeignKey(wl => wl.MesocycleDayId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // WorkoutDayExercise -> Sets
+        modelBuilder.Entity<WorkoutDayExerciseSet>()
+            .HasOne(set => set.WorkoutDayExercise)
+            .WithMany(wde => wde.Sets)
+            .HasForeignKey(set => set.WorkoutDayExerciseId);
+
+        // Set precision for WeightInLb
+        modelBuilder.Entity<WorkoutDayExerciseSet>()
+            .Property(s => s.WeightInLb)
+            .HasPrecision(6, 2); // e.g., 9999.99 max
 
         modelBuilder.Seed();
     }

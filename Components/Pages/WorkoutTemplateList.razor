@@ -1,8 +1,9 @@
 @page "/templates"
 @inject Swol.Data.ApplicationDbContext Db
 @inject NavigationManager Nav
-@using Swol.Data.Models
 @using Microsoft.EntityFrameworkCore
+@using Swol.Data.Models
+@using Swol.Data.Models.Template
 
 <PageTitle>Workout Templates</PageTitle>
 
@@ -36,12 +37,8 @@ else
                     }
                 </div>
                 <div class="p-4 text-sm flex-grow">
-                    <p><strong>Start:</strong> @template.StartDate.ToShortDateString()</p>
+                    <p><strong>Start:</strong> @(template.StartDate.HasValue ? template.StartDate.Value.ToShortDateString() : "-")</p>
                     <p><strong>Weeks:</strong> @template.NumberOfWeeks</p>
-                    @if (template.WorkoutLogs.Any())
-                    {
-                        <p><strong>Completed Workouts:</strong> @template.WorkoutLogs.Count(wl => wl.EndTime.HasValue)</p>
-                    }
                 </div>
                 <div class="px-4 py-2 border-t flex gap-3">
                     <a href="/templates/form/@template.Id" class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
@@ -64,7 +61,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         templates = await Db.WorkoutTemplates
-            .Include(m => m.WorkoutLogs)
             .OrderByDescending(m => m.IsActive)
             .ThenByDescending(m => m.StartDate)
             .ToListAsync();

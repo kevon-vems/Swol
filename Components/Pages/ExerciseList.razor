@@ -1,6 +1,7 @@
 @page "/exercises"
 @inject Swol.Data.ApplicationDbContext Db
 @using Microsoft.EntityFrameworkCore
+@using Swol.Data.Models.Config
 
 <PageTitle>Exercises</PageTitle>
 
@@ -45,7 +46,7 @@ else
 </div>
 
 @code {
-    private List<Swol.Data.Models.Exercise>? exercises;
+    private List<Exercise>? exercises;
 
     protected override async Task OnInitializedAsync()
     {

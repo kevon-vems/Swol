@@ -38,81 +38,19 @@ else
                             <strong>Template:</strong> @activeTemplate.Name
                         </p>
                         <p>
-                            <strong>Start:</strong> @activeTemplate.StartDate.ToShortDateString()
+                            <strong>Weeks:</strong> @activeTemplate.NumberOfWeeks
                         </p>
-                        <p><strong>Weeks:</strong> @activeTemplate.NumberOfWeeks</p>
                     </div>
                     <div class="md:w-1/2">
                         <div class="mt-3">
-                            @if (todaysWorkoutLog != null)
-                            {
-                                <div class="bg-green-100 border border-green-300 text-green-800 rounded-lg p-4 mb-2">
-                                    <h5 class="text-base font-semibold mb-1">Today's Workout</h5>
-                                    <p class="mb-3">Started at: @todaysWorkoutLog.StartTime.ToShortTimeString()</p>
-                                    <a href="/workoutlogs/edit/@todaysWorkoutLog.Id" class="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition">Continue Workout</a>
-                                </div>
-                            }
-                            else
-                            {
-                                <a href="#" class="inline-block bg-green-400 text-white font-medium py-3 px-4 rounded w-full opacity-60 cursor-not-allowed text-center text-lg">
-                                    Start Today's Workout (feature coming soon)
-                                </a>
-                            }
+                            <a href="#" class="inline-block bg-green-400 text-white font-medium py-3 px-4 rounded w-full opacity-60 cursor-not-allowed text-center text-lg">
+                                Start Today's Workout (feature coming soon)
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        @if (recentWorkoutLogs.Any())
-        {
-            <div class="bg-white rounded-lg shadow">
-                <div class="border-b border-gray-200 px-6 py-4">
-                    <h4 class="text-lg font-semibold">Recent Workouts</h4>
-                </div>
-                <div class="px-6 py-4">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-left text-sm">
-                            <thead>
-                                <tr>
-                                    <th class="py-2 px-3 font-semibold text-gray-700">Date</th>
-                                    <th class="py-2 px-3 font-semibold text-gray-700">Week</th>
-                                    <th class="py-2 px-3 font-semibold text-gray-700">Duration</th>
-                                    <th class="py-2 px-3 font-semibold text-gray-700">Sets</th>
-                                    <th class="py-2 px-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var log in recentWorkoutLogs)
-                                {
-                                    <tr class="border-b last:border-0">
-                                        <td class="py-2 px-3">@log.StartTime.ToShortDateString()</td>
-                                        <td class="py-2 px-3">Week @log.WorkoutTemplateWeek</td>
-                                        <td class="py-2 px-3">
-                                            @if (log.EndTime.HasValue)
-                                            {
-                                                <span>@((int)(log.EndTime.Value - log.StartTime).TotalMinutes) min</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-gray-400">In progress</span>
-                                            }
-                                        </td>
-                                        <td class="py-2 px-3">@log.ExerciseSets.Count</td>
-                                        <td class="py-2 px-3">
-                                            <a href="/workoutlogs/edit/@log.Id" class="inline-block text-sm border border-gray-400 text-gray-700 hover:bg-gray-100 px-3 py-1 rounded transition">View</a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="flex justify-end mt-4">
-                        <a href="/workoutlogs" class="inline-block border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded transition">View All Workouts</a>
-                    </div>
-                </div>
-            </div>
-        }
     }
 }
 
@@ -120,53 +58,12 @@ else
 
 @code {
     private bool isLoading = true;
-    private WorkoutTemplate? activeTemplate;
-    private WorkoutLog? todaysWorkoutLog;
-    private List<WorkoutLog> recentWorkoutLogs = new();
+    private Swol.Data.Models.Template.WorkoutTemplate? activeTemplate;
 
     protected override async Task OnInitializedAsync()
     {
         activeTemplate = await Db.WorkoutTemplates
-            .FirstOrDefaultAsync(m => m.IsActive);
-
-        if (activeTemplate != null)
-        {
-            // Get recent workout logs for this mesocycle
-            recentWorkoutLogs = await Db.WorkoutLogs
-                .Include(wl => wl.ExerciseSets)
-                .Where(wl => wl.WorkoutTemplateId == activeTemplate.Id)
-                .OrderByDescending(wl => wl.StartTime)
-                .Take(5)
-                .ToListAsync();
-
-            // Get all days in the mesocycle, ordered by week/day
-            var allDays = await Db.MesocycleDays
-                .Where(md => md.WorkoutTemplateId == activeTemplate.Id)
-                .OrderBy(md => md.WeekNumber)
-                .ThenBy(md => md.DayNumber)
-                .ToListAsync();
-
-            // Get all completed or in-progress logs
-            var completedLogs = await Db.WorkoutLogs
-                .Where(wl => wl.WorkoutTemplateId == activeTemplate.Id)
-                .ToListAsync();
-
-            // Find the first day without a log
-            var nextDay = allDays.FirstOrDefault(day =>
-                !completedLogs.Any(log => log.MesocycleDayId == day.Id));
-
-            if (nextDay != null)
-            {
-                // Optionally, find an in-progress log for this day
-                todaysWorkoutLog = completedLogs
-                    .FirstOrDefault(log => log.MesocycleDayId == nextDay.Id && log.EndTime == null);
-
-                // Redirect to the current day workout page
-                Nav.NavigateTo($"/templates/{activeTemplate.Id}/weeks/{nextDay.WeekNumber}/days/{nextDay.DayNumber}");
-                return;
-            }
-        }
-
+            .FirstOrDefaultAsync();
         isLoading = false;
     }
 }

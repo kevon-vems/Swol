@@ -1,0 +1,54 @@
+@page "/workouts/create"
+@inject Swol.Data.ApplicationDbContext Db
+@inject NavigationManager Navigation
+@using Swol.Data.Models
+@using Swol.Data.Models.Work
+
+<PageTitle>Add Workout</PageTitle>
+
+<div class="max-w-4xl mx-auto p-4 space-y-6">
+
+<h1 class="text-2xl font-bold mb-6">Add Workout</h1>
+
+<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded">
+    <strong>What is a Workout?</strong><br />
+    A Workout in this application is a collection of exercises performed together as a session. Each Workout can include multiple exercises, their order, sets, reps, and weights. Workouts are designed to be repeated and tracked over time, and can be used as part of a larger training plan (Workout Template).
+    <br /><br />
+    <strong>Example:</strong><br />
+    <em>Name:</em> Push Day<br />
+    <em>Description:</em> Upper body workout focused on chest, shoulders, and triceps.<br />
+    <em>Exercises:</em>
+    <ul class="list-disc list-inside ml-4">
+        <li>Barbell Bench Press: 4 sets x 8 reps @@ 60kg</li>
+        <li>Overhead Press: 3 sets x 10 reps @@ 35kg</li>
+        <li>Triceps Pushdown: 3 sets x 12 reps @@ 25kg</li>
+    </ul>
+</div>
+
+<EditForm Model="workout" OnValidSubmit="HandleValidSubmit" FormName="WorkoutCreateForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="mb-4 text-red-600" />
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <InputText class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="workout.Name" />
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <InputTextArea class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="workout.Description" />
+    </div>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">Save</button>
+    <a class="ml-3 bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 rounded shadow" href="/workouts">Cancel</a>
+</EditForm>
+
+</div>
+
+@code {
+    private Workout workout = new();
+
+    private async Task HandleValidSubmit()
+    {
+        Db.Workouts.Add(workout);
+        await Db.SaveChangesAsync();
+        Navigation.NavigateTo("/workouts");
+    }
+}

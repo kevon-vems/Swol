@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Components;
-using Swol.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Swol.Enums;
+using Swol.Data.Models.Template;
+using Swol.Data.Models.Config;
 
 namespace Swol.Components.Pages;
 
@@ -47,13 +48,13 @@ public partial class WorkoutTemplateCreate : ComponentBase
         else
         {
             // Create mode: initialize with all days
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Sunday });
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Monday });
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Tuesday });
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Wednesday });
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Thursday });
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Friday });
-            template.Days.Add(new MesocycleDay { DayOfWeek = DayOfWeek.Saturday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Sunday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Monday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Tuesday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Wednesday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Thursday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Friday });
+            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Saturday });
             foreach (var d in template.Days)
                 newExerciseDayId[d.DayOfWeek] = 0;
         }
@@ -63,20 +64,20 @@ public partial class WorkoutTemplateCreate : ComponentBase
     {
         var available = Enum.GetValues<DayOfWeek>().Except(template.Days.Select(d => d.DayOfWeek)).ToList();
         if (!available.Any()) return;
-        var day = new MesocycleDay { DayOfWeek = available.First() };
+        var day = new WorkoutTemplateDay { DayOfWeek = available.First() };
         template.Days.Add(day);
         newExerciseDayId[day.DayOfWeek] = 0;
         StateHasChanged();
     }
 
-    private void RemoveDay(MesocycleDay day)
+    private void RemoveDay(WorkoutTemplateDay day)
     {
         template.Days.Remove(day);
         newExerciseDayId.Remove(day.DayOfWeek);
         StateHasChanged();
     }
 
-    private void OnExerciseSelected(MesocycleDay day, object value, MesocycleDayExercise? editingEx = null)
+    private void OnExerciseSelected(WorkoutTemplateDay day, object value, WorkoutTemplateDayExercise? editingEx = null)
     {
         if (int.TryParse(value?.ToString(), out var exId) && exId > 0)
         {
@@ -96,13 +97,13 @@ public partial class WorkoutTemplateCreate : ComponentBase
             StateHasChanged();
         }
     }
-    private void AddExerciseToDay(MesocycleDay day)
+    private void AddExerciseToDay(WorkoutTemplateDay day)
     {
         if (!selectedExerciseId.TryGetValue(day.DayOfWeek, out var exId) || exId == 0) return;
         if (day.Exercises.Any(e => e.ExerciseId == exId)) return;
         var exercise = allExercises.FirstOrDefault(e => e.Id == exId);
         if (exercise == null) return;
-        var ex = new MesocycleDayExercise
+        var ex = new WorkoutTemplateDayExercise
         {
             ExerciseId = exId,
             Exercise = exercise,
@@ -157,13 +158,13 @@ public partial class WorkoutTemplateCreate : ComponentBase
         }
         return Enumerable.Empty<Exercise>();
     }
-    private void RemoveExerciseFromDay(MesocycleDay day, MesocycleDayExercise ex)
+    private void RemoveExerciseFromDay(WorkoutTemplateDay day, WorkoutTemplateDayExercise ex)
     {
         day.Exercises.Remove(ex);
         StateHasChanged();
     }
 
-    private void OnDayOfWeekChanged(MesocycleDay day, object? value)
+    private void OnDayOfWeekChanged(WorkoutTemplateDay day, object? value)
     {
         if (value is null) return;
         if (!Enum.TryParse<DayOfWeek>(value.ToString(), out var newDayOfWeek)) return;

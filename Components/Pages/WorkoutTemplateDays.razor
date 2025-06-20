@@ -1,4 +1,4 @@
-@page "/templates/{WorkoutTemplateId:int}/weeks/{WeekNumber:int}/days/{DayNumber:int}"
+@page "/templates/{WorkoutTemplateId:int}/days/{DayNumber:int}"
 @inject Swol.Data.ApplicationDbContext Db
 @inject NavigationManager Nav
 @using Swol.Data.Models
@@ -11,6 +11,5 @@
 
 @code {
     [Parameter] public int WorkoutTemplateId { get; set; }
-    [Parameter] public int WeekNumber { get; set; }
     [Parameter] public int DayNumber { get; set; }
 }

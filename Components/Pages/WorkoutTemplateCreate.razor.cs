@@ -178,7 +178,6 @@ public partial class WorkoutTemplateCreate : ComponentBase
 
     private async Task HandleSubmit()
     {
-        template.IsActive = true;
 
         if (Id.HasValue)
         {

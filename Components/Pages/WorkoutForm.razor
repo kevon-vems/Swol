@@ -3,6 +3,7 @@
 @inject NavigationManager Navigation
 @using Swol.Data.Models
 @using Swol.Data.Models.Work
+@using Swol.Data.Models.Template
 
 <PageTitle>Add Workout</PageTitle>
 
@@ -36,6 +37,10 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <InputTextArea class="block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @bind-Value="workout.Description" />
     </div>
+    <div class="mb-4 flex items-center gap-2">
+        <InputCheckbox id="saveTemplate" @bind-Value="saveAsTemplate" />
+        <label for="saveTemplate" class="text-sm font-medium text-gray-700">Save as template</label>
+    </div>
     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">Save</button>
     <a class="ml-3 bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 rounded shadow" href="/workouts">Cancel</a>
 </EditForm>
@@ -44,11 +49,51 @@
 
 @code {
     private Workout workout = new();
+    private bool saveAsTemplate;
 
     private async Task HandleValidSubmit()
     {
         Db.Workouts.Add(workout);
         await Db.SaveChangesAsync();
+
+        if (saveAsTemplate)
+        {
+            var template = new WorkoutTemplate
+            {
+                Name = workout.Name,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            int dayNumber = 1;
+            foreach (var wDay in workout.Days.OrderBy(d => d.DayOfWeek))
+            {
+                var tDay = new WorkoutTemplateDay
+                {
+                    DayOfWeek = wDay.DayOfWeek,
+                    DayNumber = dayNumber++,
+                };
+
+                foreach (var wEx in wDay.Exercises.OrderBy(e => e.OrderInDay))
+                {
+                    var tEx = new WorkoutTemplateDayExercise
+                    {
+                        ExerciseId = wEx.ExerciseId,
+                        OrderInDay = wEx.OrderInDay
+                    };
+                    tDay.Exercises.Add(tEx);
+                }
+
+                template.Days.Add(tDay);
+            }
+
+            Db.WorkoutTemplates.Add(template);
+            await Db.SaveChangesAsync();
+
+            workout.WorkoutTemplateId = template.Id;
+            Db.Workouts.Update(workout);
+            await Db.SaveChangesAsync();
+        }
+
         Navigation.NavigateTo("/workouts");
     }
 }

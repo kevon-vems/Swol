@@ -4,9 +4,9 @@ using Swol.Enums;
 using Swol.Data.Models.Template;
 using Swol.Data.Models.Config;
 
-namespace Swol.Components.Pages;
+namespace Swol.Components.Forms;
 
-public partial class WorkoutTemplateCreate : ComponentBase
+public partial class WorkoutTemplateFormBase : ComponentBase
 {
     [Inject] public Data.ApplicationDbContext Db { get; set; } = default!;
     [Inject] public NavigationManager Nav { get; set; } = default!;
@@ -189,6 +189,24 @@ public partial class WorkoutTemplateCreate : ComponentBase
         }
 
         await Db.SaveChangesAsync();
+        Nav.NavigateTo("/templates");
+    }
+
+    private async Task DeleteTemplate()
+    {
+        if (!Id.HasValue) return;
+
+        var toDelete = await Db.WorkoutTemplates
+            .Include(t => t.Days)
+                .ThenInclude(d => d.Exercises)
+            .FirstOrDefaultAsync(t => t.Id == Id.Value);
+
+        if (toDelete != null)
+        {
+            Db.WorkoutTemplates.Remove(toDelete);
+            await Db.SaveChangesAsync();
+        }
+
         Nav.NavigateTo("/templates");
     }
 }

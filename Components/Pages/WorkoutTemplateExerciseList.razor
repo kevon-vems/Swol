@@ -70,24 +70,23 @@
                 </div>
             </div>
         }
+
+        @if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && (!SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var selMg2) || selMg2 == null))
+        {
+            <select class="block w-full text-sm border border-gray-300 rounded px-2 py-1 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    @onchange="e => MuscleGroupChanged?.Invoke(Day.DayOfWeek, e?.Value ?? string.Empty)">
+                <option value="">-- Select Muscle Group --</option>
+                @foreach (var mg in Enum.GetValues<MuscleGroups>())
+                {
+                    <option value="@mg">@mg</option>
+                }
+            </select>
+        }
+        else if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var mg) && mg != null && !GetExercisesForDay(Day.DayOfWeek).Any())
+        {
+            <div class="text-gray-400 mb-2">No exercises for this muscle group.</div>
+        }
     </div>
-</div>
-<div class="p-2">
-    @if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && (!SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var selMg2) || selMg2 == null))
-    {
-        <select class="block w-full text-sm border border-gray-300 rounded px-2 py-1 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                @onchange="e => MuscleGroupChanged?.Invoke(Day.DayOfWeek, e?.Value ?? string.Empty)">
-            <option value="">-- Select Muscle Group --</option>
-            @foreach (var mg in Enum.GetValues<MuscleGroups>())
-            {
-                <option value="@mg">@mg</option>
-            }
-        </select>
-    }
-    else if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var mg) && mg != null && !GetExercisesForDay(Day.DayOfWeek).Any())
-    {
-        <div class="text-gray-400 mb-2">No exercises for this muscle group.</div>
-    }
 </div>
 
 @code {

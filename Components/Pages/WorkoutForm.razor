@@ -94,6 +94,55 @@
             await Db.SaveChangesAsync();
         }
 
+        await CreateUpcomingWeekAsync(workout);
+
         Navigation.NavigateTo("/workouts");
+    }
+
+    private async Task CreateUpcomingWeekAsync(Workout workout)
+    {
+        WorkoutTemplate? template = null;
+        if (workout.WorkoutTemplateId.HasValue)
+        {
+            template = await Db.WorkoutTemplates
+                .Include(t => t.Days)
+                    .ThenInclude(d => d.Exercises)
+                .FirstOrDefaultAsync(t => t.Id == workout.WorkoutTemplateId.Value);
+        }
+
+        var startDate = workout.StartDate ?? DateTime.Today;
+
+        for (int i = 0; i < 7; i++)
+        {
+            var dow = startDate.AddDays(i).DayOfWeek;
+            var wDay = new WorkoutDay
+            {
+                WorkoutId = workout.Id,
+                DayOfWeek = dow,
+                Name = dow.ToString()
+            };
+            Db.WorkoutDays.Add(wDay);
+            await Db.SaveChangesAsync();
+
+            if (template != null)
+            {
+                var tDay = template.Days.FirstOrDefault(d => d.DayOfWeek == dow);
+                if (tDay != null)
+                {
+                    foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))
+                    {
+                        var wEx = new WorkoutDayExercise
+                        {
+                            WorkoutDayId = wDay.Id,
+                            ExerciseId = tEx.ExerciseId,
+                            OrderInDay = tEx.OrderInDay
+                        };
+                        Db.WorkoutDayExercises.Add(wEx);
+                    }
+
+                    await Db.SaveChangesAsync();
+                }
+            }
+        }
     }
 }

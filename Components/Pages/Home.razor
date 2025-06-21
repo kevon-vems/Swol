@@ -40,9 +40,11 @@ else
                     </div>
                     <div class="md:w-1/2">
                         <div class="mt-3">
-                            <a href="#" class="inline-block bg-green-400 text-white font-medium py-3 px-4 rounded w-full opacity-60 cursor-not-allowed text-center text-lg">
-                                Start Today's Workout (feature coming soon)
-                            </a>
+                            <button type="button"
+                                    class="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded w-full text-center text-lg"
+                                    @onclick="StartWorkoutAsync">
+                                Start Today's Workout
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -52,15 +54,3 @@ else
 }
 
 </div>
-
-@code {
-    private bool isLoading = true;
-    private Swol.Data.Models.Template.WorkoutTemplate? activeTemplate;
-
-    protected override async Task OnInitializedAsync()
-    {
-        activeTemplate = await Db.WorkoutTemplates
-            .FirstOrDefaultAsync();
-        isLoading = false;
-    }
-}

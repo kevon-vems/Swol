@@ -10,7 +10,7 @@
 
 <h1 class="text-3xl font-bold mb-6">Workouts</h1>
 
-<a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mb-6" href="/workouts/create">Add Workout</a>
+<a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mb-6" href="/workouts/form">Add Workout</a>
 
 @if (workouts == null)
 {
@@ -34,8 +34,7 @@ else
                         <td class="px-6 py-4 whitespace-nowrap border-b">@workout.Name</td>
                         <td class="px-6 py-4 whitespace-nowrap border-b">@workout.Description</td>
                         <td class="px-6 py-4 whitespace-nowrap border-b space-x-2">
-                            <a class="inline-block bg-gray-200 hover:bg-gray-300 text-black font-medium py-1 px-3 rounded text-sm" href="/workouts/edit/@workout.Id">Edit</a>
-                            <a class="inline-block bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded text-sm" href="/workouts/delete/@workout.Id">Delete</a>
+                            <a class="inline-block bg-gray-200 hover:bg-gray-300 text-black font-medium py-1 px-3 rounded text-sm" href="/workouts/form/@workout.Id">Edit</a>
                         </td>
                     </tr>
                 }

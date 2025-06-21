@@ -1,0 +1,60 @@
+@using Swol.Data.Models.Template
+@using Swol.Data.Models.Config
+
+<div class="mb-2 space-y-1">
+    @if (Day.Exercises.Any())
+    {
+        foreach (var ex in Day.Exercises)
+        {
+            <div class="mb-2 rounded border border-gray-200">
+                <div class="flex items-center justify-between bg-blue-600 p-1 rounded-t pl-2">
+                    <span class="text-white text-sm font-semibold">
+                        @string.Join(", ", ex.Exercise?.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name) ?? new List<string>())
+                    </span>
+                    <button type="button" class="p-1 text-white hover:text-red-200 transition" @onclick="() => RemoveExercise?.Invoke(Day, ex)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="px-3 py-2 text-gray-900 text-base">
+                    @if (EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0)))
+                    {
+                        <select class="block w-full text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                @onchange="async e => await HandleExerciseChange(e, ex)"
+                                @onblur="async () => StopEditingExercise?.Invoke(Day.DayOfWeek, ex.Exercise?.Id ?? 0)">
+                            <option value="0">-- Select Exercise --</option>
+                            @foreach (var exercise in GetExercisesForDay(Day.DayOfWeek))
+                            {
+                                <option value="@exercise.Id" selected="@(exercise.Id == (ex.Exercise?.Id ?? 0))">
+                                    @exercise.Name (@string.Join(", ", exercise.ExerciseMuscleGroups.Select(emg => emg.MuscleGroup.Name)))
+                                </option>
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <span class="cursor-pointer hover:underline" @onclick="() => StartEditingExercise?.Invoke(Day.DayOfWeek, ex.Exercise?.Id ?? 0)">
+                            @ex.Exercise?.Name
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public WorkoutTemplateDay Day { get; set; } = default!;
+    [Parameter] public HashSet<(DayOfWeek, int)> EditingExercises { get; set; } = new();
+    [Parameter] public Action<WorkoutTemplateDay, WorkoutTemplateDayExercise>? RemoveExercise { get; set; }
+    [Parameter] public Action<DayOfWeek, int>? StartEditingExercise { get; set; }
+    [Parameter] public Action<DayOfWeek, int>? StopEditingExercise { get; set; }
+    [Parameter] public Func<DayOfWeek, IEnumerable<Exercise>> GetExercisesForDay { get; set; } = default!;
+    [Parameter] public Action<WorkoutTemplateDay, object, WorkoutTemplateDayExercise?>? ExerciseSelected { get; set; }
+
+    private Task HandleExerciseChange(ChangeEventArgs e, WorkoutTemplateDayExercise ex)
+    {
+        ExerciseSelected?.Invoke(Day, e.Value ?? string.Empty, ex);
+        StopEditingExercise?.Invoke(Day.DayOfWeek, ex.Exercise?.Id ?? 0);
+        return Task.CompletedTask;
+    }
+}

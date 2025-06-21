@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Swol.Data.Models;
 using Swol.Data.Models.Config;
 using Swol.Data.Models.Template;
 using Swol.Data.Models.Work;
@@ -59,7 +58,7 @@ public class ApplicationDbContext : DbContext
         // Workout -> Template
         modelBuilder.Entity<Workout>()
             .HasOne(w => w.WorkoutTemplate)
-            .WithMany()
+            .WithMany(wt => wt.Workouts)
             .HasForeignKey(w => w.WorkoutTemplateId);
 
         // Workout -> Days
@@ -87,7 +86,7 @@ public class ApplicationDbContext : DbContext
         // Set precision for WeightInLb
         modelBuilder.Entity<WorkoutDayExerciseSet>()
             .Property(s => s.WeightInLb)
-            .HasPrecision(6, 2); // e.g., 9999.99 max
+            .HasPrecision(6, 2); 
 
         modelBuilder.Seed();
     }

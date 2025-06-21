@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Swol.Data;
 
@@ -11,9 +12,11 @@ using Swol.Data;
 namespace Swol.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250621000809_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -600,12 +603,12 @@ namespace Swol.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -670,18 +673,18 @@ namespace Swol.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("NumberOfWeeks")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfWeeks")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
@@ -823,6 +826,15 @@ namespace Swol.Migrations
                     b.Navigation("WorkoutTemplateDay");
                 });
 
+            modelBuilder.Entity("Swol.Data.Models.Work.Workout", b =>
+                {
+                    b.HasOne("Swol.Data.Models.Template.WorkoutTemplate", "WorkoutTemplate")
+                        .WithMany("Workouts")
+                        .HasForeignKey("WorkoutTemplateId");
+
+                    b.Navigation("WorkoutTemplate");
+                });
+
             modelBuilder.Entity("Swol.Data.Models.Work.WorkoutDay", b =>
                 {
                     b.HasOne("Swol.Data.Models.Work.Workout", "Workout")
@@ -872,6 +884,8 @@ namespace Swol.Migrations
             modelBuilder.Entity("Swol.Data.Models.Template.WorkoutTemplate", b =>
                 {
                     b.Navigation("Days");
+
+                    b.Navigation("Workouts");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.Template.WorkoutTemplateDay", b =>
@@ -882,7 +896,6 @@ namespace Swol.Migrations
             modelBuilder.Entity("Swol.Data.Models.Work.Workout", b =>
                 {
                     b.Navigation("Days");
-                    b.Navigation("WorkoutTemplate");
                 });
 
             modelBuilder.Entity("Swol.Data.Models.Work.WorkoutDay", b =>

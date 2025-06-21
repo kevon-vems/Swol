@@ -43,26 +43,35 @@ public partial class Home : ComponentBase
                 .ThenInclude(d => d.Exercises)
             .FirstAsync(t => t.Id == activeTemplate.Id);
 
-        foreach (var tDay in template.Days.OrderBy(d => d.DayNumber))
+        var startDate = workout.StartDate ?? DateTime.Today;
+
+        for (int i = 0; i < 7; i++)
         {
+            var dow = startDate.AddDays(i).DayOfWeek;
             var wDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
-                DayOfWeek = tDay.DayOfWeek,
-                Name = tDay.DayOfWeek.ToString()
+                DayOfWeek = dow,
+                Name = dow.ToString()
             };
             Db.WorkoutDays.Add(wDay);
             await Db.SaveChangesAsync();
 
-            foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))
+            var tDay = template.Days.FirstOrDefault(d => d.DayOfWeek == dow);
+            if (tDay != null)
             {
-                var wEx = new WorkoutDayExercise
+                foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))
                 {
-                    WorkoutDayId = wDay.Id,
-                    ExerciseId = tEx.ExerciseId,
-                    OrderInDay = tEx.OrderInDay
-                };
-                Db.WorkoutDayExercises.Add(wEx);
+                    var wEx = new WorkoutDayExercise
+                    {
+                        WorkoutDayId = wDay.Id,
+                        ExerciseId = tEx.ExerciseId,
+                        OrderInDay = tEx.OrderInDay
+                    };
+                    Db.WorkoutDayExercises.Add(wEx);
+                }
+
+                await Db.SaveChangesAsync();
             }
         }
 

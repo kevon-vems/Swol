@@ -120,8 +120,8 @@ public partial class WorkoutTemplateFormBase : ComponentBase
 
     private void OnMuscleGroupChanged(DayOfWeek day, object value)
     {
-        if (Enum.TryParse<MuscleGroups>(value?.ToString(), out var mg))
-            selectedMuscleGroup[day] = mg;
+        if (Enum.TryParse<MuscleGroups>(value?.ToString(), out var muscleGroup))
+            selectedMuscleGroup[day] = muscleGroup;
         else
             selectedMuscleGroup[day] = null;
         selectedExerciseId[day] = 0;
@@ -142,9 +142,9 @@ public partial class WorkoutTemplateFormBase : ComponentBase
 
         if (ex?.Exercise != null)
         {
-            var mg = ex.Exercise.ExerciseMuscleGroups.FirstOrDefault()?.MuscleGroup;
-            if (mg != null)
-                editingMuscleGroup[(dayOfWeek, exerciseId)] = Enum.Parse<MuscleGroups>(mg.Name);
+            var muscleGroup = ex.Exercise.ExerciseMuscleGroups.FirstOrDefault()?.MuscleGroup;
+            if (muscleGroup != null)
+                editingMuscleGroup[(dayOfWeek, exerciseId)] = Enum.Parse<MuscleGroups>(muscleGroup.Name);
         }
     }
     private void StopEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
@@ -154,9 +154,9 @@ public partial class WorkoutTemplateFormBase : ComponentBase
     }
     private IEnumerable<Exercise> GetExercisesForDay(DayOfWeek dayOfWeek)
     {
-        if (selectedMuscleGroup.TryGetValue(dayOfWeek, out var mg) && mg != null)
+        if (selectedMuscleGroup.TryGetValue(dayOfWeek, out var muscleGroup) && muscleGroup != null)
         {
-            return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == mg.ToString()));
+            return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == muscleGroup.ToString()));
         }
         return Enumerable.Empty<Exercise>();
     }

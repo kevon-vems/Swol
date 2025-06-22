@@ -25,12 +25,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var mg in groups)
+                    @foreach (var group in groups)
                     {
                         <tr class="border-t border-gray-200 hover:bg-gray-50">
-                            <td class="px-4 py-2">@mg.Name</td>
+                            <td class="px-4 py-2">@group.Name</td>
                             <td class="px-4 py-2 whitespace-nowrap">
-                                <a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded shadow text-sm mr-2" href="/musclegroups/form/@mg.Id">Edit</a>
+                                <a class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded shadow text-sm mr-2" href="/musclegroups/form/@group.Id">Edit</a>
                             </td>
                         </tr>
                     }

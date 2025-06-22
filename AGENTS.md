@@ -1,4 +1,5 @@
 # Setup
+This project requires the .NET SDK (9.0+). If using a cloud dev environment, ensure the image includes it, or run setup.sh.
 If you get "dotnet: command not found", run:
 bash setup.sh
 

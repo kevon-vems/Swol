@@ -1,0 +1,48 @@
+@using Swol.Data.Models.Work
+@using Swol.Data.Models.Config
+@using Swol.Enums
+
+<div class="bg-stone-50 rounded w-[250px] min-w-[250px] max-w-[250px] flex flex-col border border-1 border-gray-400">
+    <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+        <InputSelect class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     @bind-Value="Day.DayOfWeek"
+                     @onchange="e => DayOfWeekChanged?.Invoke(Day, e.Value)">
+            @foreach (var dow in Enum.GetValues<DayOfWeek>())
+            {
+                if (!WorkoutDays.Any(d => d != Day && d.DayOfWeek == dow))
+                {
+                    <option value="@dow">@dow</option>
+                }
+            }
+        </InputSelect>
+        <button type="button" class="p-1 text-gray-700 hover:text-red-600 transition cursor-pointer" @onclick="() => RemoveDay?.Invoke(Day)">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+    <WorkoutExerciseList Day="Day"
+                         EditingExercises="EditingExercises"
+                         RemoveExercise="RemoveExercise"
+                         StartEditingExercise="StartEditingExercise"
+                         StopEditingExercise="StopEditingExercise"
+                         GetExercisesForDay="GetExercisesForDay"
+                         ExerciseSelected="ExerciseSelected"
+                         SelectedMuscleGroup="SelectedMuscleGroup"
+                         MuscleGroupChanged="MuscleGroupChanged"
+                         RemoveSelectedMuscleGroup="RemoveSelectedMuscleGroup" />
+</div>
+
+@code {
+    [Parameter] public WorkoutDay Day { get; set; } = default!;
+    [Parameter] public ICollection<WorkoutDay> WorkoutDays { get; set; } = new List<WorkoutDay>();
+    [Parameter] public HashSet<(DayOfWeek, int)> EditingExercises { get; set; } = new();
+    [Parameter] public Dictionary<DayOfWeek, MuscleGroups?> SelectedMuscleGroup { get; set; } = new();
+    [Parameter] public Action<WorkoutDay>? RemoveDay { get; set; }
+    [Parameter] public Action<WorkoutDay, object?>? DayOfWeekChanged { get; set; }
+    [Parameter] public Action<WorkoutDay, object, WorkoutDayExercise?>? ExerciseSelected { get; set; }
+    [Parameter] public Action<DayOfWeek, object>? MuscleGroupChanged { get; set; }
+    [Parameter] public Action<DayOfWeek>? RemoveSelectedMuscleGroup { get; set; }
+    [Parameter] public Action<WorkoutDay, WorkoutDayExercise>? RemoveExercise { get; set; }
+    [Parameter] public Action<DayOfWeek, int>? StartEditingExercise { get; set; }
+    [Parameter] public Action<DayOfWeek, int>? StopEditingExercise { get; set; }
+    [Parameter] public Func<DayOfWeek, IEnumerable<Exercise>> GetExercisesForDay { get; set; } = default!;
+}

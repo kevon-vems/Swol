@@ -1,0 +1,8 @@
+{
+  "name": "dotnet9-codex",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings": {},
+  "postCreateCommand": "dotnet --version"
+}

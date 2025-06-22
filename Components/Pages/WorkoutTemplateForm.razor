@@ -1,6 +1,7 @@
 @page "/templates/form/{Id:int?}"
+@using Swol.Components.Forms
 
-<Components.Forms.WorkoutTemplateFormBase Id="@Id" />
+<WorkoutTemplateFormBase Id="@Id" />
 
 @code {
     [Parameter] public int? Id { get; set; }

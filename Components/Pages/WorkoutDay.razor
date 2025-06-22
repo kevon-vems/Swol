@@ -1,0 +1,89 @@
+@page "/workouts/{Id:int}"
+@using Microsoft.EntityFrameworkCore
+@using Swol.Data.Models.Work
+@inject Swol.Data.ApplicationDbContext Db
+
+<PageTitle>Today's Workout</PageTitle>
+
+<div class="max-w-xl mx-auto p-4 space-y-6">
+    @if (isLoading)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (workoutDay == null)
+    {
+        <p>No workout scheduled for today.</p>
+    }
+    else
+    {
+        <h1 class="text-2xl font-bold mb-4">@workoutDay.Name</h1>
+        <EditForm Model="workoutDay" OnValidSubmit="SaveAsync">
+            <div class="space-y-4">
+                @foreach (var ex in workoutDay.Exercises.OrderBy(e => e.OrderInDay))
+                {
+                    <div class="bg-white rounded shadow p-4">
+                        <h2 class="font-semibold text-lg mb-2">@ex.Exercise.Name</h2>
+                        <div class="space-y-2">
+                            @foreach (var set in ex.Sets.OrderBy(s => s.SetNumber))
+                            {
+                                <div class="flex items-center gap-3">
+                                    <span class="w-14">Set @set.SetNumber</span>
+                                    <InputNumber class="flex-1 border rounded px-2 py-1" @bind-Value="set.Reps" />
+                                    <InputNumber class="flex-1 border rounded px-2 py-1" Step="0.1" @bind-Value="set.WeightInLb" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <button type="submit" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">Save</button>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private WorkoutDay? workoutDay;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var workout = await Db.Workouts
+            .Include(w => w.Days)
+                .ThenInclude(d => d.Exercises)
+                    .ThenInclude(e => e.Exercise)
+            .Include(w => w.Days)
+                .ThenInclude(d => d.Exercises)
+                    .ThenInclude(e => e.Sets)
+            .FirstOrDefaultAsync(w => w.Id == Id);
+
+        if (workout != null)
+        {
+            var dow = DateTime.Today.DayOfWeek;
+            workoutDay = workout.Days.FirstOrDefault(d => d.DayOfWeek == dow);
+            if (workoutDay != null)
+            {
+                foreach (var ex in workoutDay.Exercises.OrderBy(e => e.OrderInDay))
+                {
+                    if (ex.Sets.Count < 2)
+                    {
+                        int next = ex.Sets.Any() ? ex.Sets.Max(s => s.SetNumber) + 1 : 1;
+                        while (ex.Sets.Count < 2)
+                        {
+                            ex.Sets.Add(new WorkoutDayExerciseSet { SetNumber = next++ });
+                        }
+                    }
+                }
+                await Db.SaveChangesAsync();
+            }
+        }
+
+        isLoading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        await Db.SaveChangesAsync();
+    }
+}

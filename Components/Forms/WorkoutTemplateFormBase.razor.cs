@@ -12,6 +12,8 @@ public partial class WorkoutTemplateFormBase : ComponentBase
     [Inject] public NavigationManager Nav { get; set; } = default!;
     [Parameter] public int? Id { get; set; }
 
+    private string PageTitle => Id.HasValue ? "Edit Template" : "Add Template";
+
     private WorkoutTemplate template = new WorkoutTemplate();
     private List<Exercise> allExercises = new();
     private Dictionary<DayOfWeek, int> newExerciseDayId = new();

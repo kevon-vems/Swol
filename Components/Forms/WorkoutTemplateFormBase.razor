@@ -2,17 +2,16 @@
 @using Microsoft.EntityFrameworkCore
 @using Swol.Enums
 
-<div class="justify-self-start">
-    <button type="submit" form="templateForm" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">@(template.Id > 0 ? "Save" : "Create")</button>
-    @if (template.Id > 0)
-    {
-        <button type="button" class="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition" @onclick="DeleteTemplate">Delete</button>
-    }
-    <a href="/templates" class="ml-2 px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 transition">Cancel</a>
-</div>
-<div class="pt-2">
-    <div>
-        <EditForm Model="template" OnValidSubmit="HandleSubmit" id="templateForm">
+<PageTitle>@PageTitle</PageTitle>
+
+<div class="max-w-4xl mx-auto p-4 space-y-6">
+    <EditForm Model="template" OnValidSubmit="HandleSubmit" id="templateForm">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">@PageTitle</h1>
+            <button type="submit" class="text-blue-600 hover:text-blue-800 text-2xl">
+                <i class="bi bi-save"></i>
+            </button>
+        </div>
             <div class="mb-3">
                 <div>
                     <div class="flex flex-wrap gap-4">
@@ -53,6 +52,13 @@
                     }
                 </div>
             </div>
-        </EditForm>
-    </div>
+        <div class="flex items-center mt-6">
+            @if (template.Id > 0)
+            {
+                <button type="button" class="text-red-600 text-xl" @onclick="DeleteTemplate">
+                    <i class="bi bi-trash"></i>
+                </button>
+            }
+        </div>
+    </EditForm>
 </div>

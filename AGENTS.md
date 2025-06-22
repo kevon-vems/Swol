@@ -2,6 +2,13 @@
 If you get "dotnet: command not found", run:
 bash setup.sh
 
+# Coding Standards
+Don't use pages / component names that have the same name as a model
+Don't name pages / components with the same name as a folder
+use file scoped namespaces
+don't abbreviate variable names
+
+
 # Build
 dotnet build Swol.sln
 

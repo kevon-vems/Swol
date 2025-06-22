@@ -50,7 +50,7 @@ public partial class Home : ComponentBase
             var dow = startDate.AddDays(i).DayOfWeek;
             var wDay = new WorkoutDay
             {
-                WorkoutId = workout.Id,
+                Id = workout.Id,
                 DayOfWeek = dow,
                 Name = dow.ToString()
             };

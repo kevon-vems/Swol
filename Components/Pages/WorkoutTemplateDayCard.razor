@@ -4,17 +4,19 @@
 
 <div class="bg-stone-50 rounded w-[250px] min-w-[250px] max-w-[250px] flex flex-col border border-1 border-gray-400">
     <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
-        <InputSelect class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                     @bind-Value="Day.DayOfWeek"
-                     @onchange="e => DayOfWeekChanged?.Invoke(Day, e.Value)">
-            @foreach (var dow in Enum.GetValues<DayOfWeek>())
-            {
-                if (!TemplateDays.Any(d => d != Day && d.DayOfWeek == dow))
+        <div class="flex gap-2">
+            <InputSelect class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         @bind-Value="Day.DayOfWeek"
+                         @onchange="e => DayOfWeekChanged?.Invoke(Day, e.Value)">
+                @foreach (var dow in Enum.GetValues<DayOfWeek>())
                 {
                     <option value="@dow">@dow</option>
                 }
-            }
-        </InputSelect>
+            </InputSelect>
+            <InputText class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       @bind-Value="Day.Label"
+                       @onchange="e => LabelChanged?.Invoke(Day, e.Value)" />
+        </div>
         <button type="button" class="p-1 text-gray-700 hover:text-red-600 transition cursor-pointer" @onclick="() => RemoveDay?.Invoke(Day)">
             <i class="bi bi-trash"></i>
         </button>
@@ -34,15 +36,16 @@
 @code {
     [Parameter] public WorkoutTemplateDay Day { get; set; } = default!;
     [Parameter] public ICollection<WorkoutTemplateDay> TemplateDays { get; set; } = new List<WorkoutTemplateDay>();
-    [Parameter] public HashSet<(DayOfWeek, int)> EditingExercises { get; set; } = new();
-    [Parameter] public Dictionary<DayOfWeek, MuscleGroups?> SelectedMuscleGroup { get; set; } = new();
+    [Parameter] public HashSet<(string, int)> EditingExercises { get; set; } = new();
+    [Parameter] public Dictionary<string, MuscleGroups?> SelectedMuscleGroup { get; set; } = new();
     [Parameter] public Action<WorkoutTemplateDay>? RemoveDay { get; set; }
+    [Parameter] public Action<WorkoutTemplateDay, object?>? LabelChanged { get; set; }
     [Parameter] public Action<WorkoutTemplateDay, object?>? DayOfWeekChanged { get; set; }
     [Parameter] public Action<WorkoutTemplateDay, object, WorkoutTemplateDayExercise?>? ExerciseSelected { get; set; }
-    [Parameter] public Action<DayOfWeek, object>? MuscleGroupChanged { get; set; }
-    [Parameter] public Action<DayOfWeek>? RemoveSelectedMuscleGroup { get; set; }
+    [Parameter] public Action<string, object>? MuscleGroupChanged { get; set; }
+    [Parameter] public Action<string>? RemoveSelectedMuscleGroup { get; set; }
     [Parameter] public Action<WorkoutTemplateDay, WorkoutTemplateDayExercise>? RemoveExercise { get; set; }
-    [Parameter] public Action<DayOfWeek, int>? StartEditingExercise { get; set; }
-    [Parameter] public Action<DayOfWeek, int>? StopEditingExercise { get; set; }
-    [Parameter] public Func<DayOfWeek, IEnumerable<Exercise>> GetExercisesForDay { get; set; } = default!;
+    [Parameter] public Action<string, int>? StartEditingExercise { get; set; }
+    [Parameter] public Action<string, int>? StopEditingExercise { get; set; }
+    [Parameter] public Func<string, IEnumerable<Exercise>> GetExercisesForDay { get; set; } = default!;
 }

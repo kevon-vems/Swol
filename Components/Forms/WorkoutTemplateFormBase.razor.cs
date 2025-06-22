@@ -16,12 +16,10 @@ public partial class WorkoutTemplateFormBase : ComponentBase
 
     private WorkoutTemplate template = new WorkoutTemplate();
     private List<Exercise> allExercises = new();
-    private Dictionary<DayOfWeek, int> newExerciseDayId = new();
-    private Dictionary<DayOfWeek, MuscleGroups?> selectedMuscleGroup = new();
-    private Dictionary<DayOfWeek, int> selectedExerciseId = new();
-    private HashSet<(DayOfWeek, int)> editingExercises = new();
-    private Dictionary<(DayOfWeek, int), MuscleGroups?> editingMuscleGroup = new();
-    public string? selectedDayToAdd { get; set; }
+    private Dictionary<string, MuscleGroups?> selectedMuscleGroup = new();
+    private Dictionary<string, int> selectedExerciseId = new();
+    private HashSet<(string, int)> editingExercises = new();
+    private Dictionary<(string, int), MuscleGroups?> editingMuscleGroup = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -42,40 +40,34 @@ public partial class WorkoutTemplateFormBase : ComponentBase
                                 .ThenInclude(emg => emg.MuscleGroup)
                 .FirstOrDefaultAsync(m => m.Id == Id.Value)
                 ?? new WorkoutTemplate();
-
-            // Initialize newExerciseDayId for loaded days
-            foreach (var d in template.Days)
-                newExerciseDayId[d.DayOfWeek] = 0;
         }
         else
         {
-            // Create mode: initialize with all days
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Sunday });
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Monday });
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Tuesday });
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Wednesday });
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Thursday });
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Friday });
-            template.Days.Add(new WorkoutTemplateDay { DayOfWeek = DayOfWeek.Saturday });
-            foreach (var d in template.Days)
-                newExerciseDayId[d.DayOfWeek] = 0;
+            // Create mode: initialize with a few default days
+            template = new WorkoutTemplate();
+            template.Days.Add(new WorkoutTemplateDay { Label = "Day 1", DayOfWeek = DayOfWeek.Monday, OrderNumber = 1 });
+            template.Days.Add(new WorkoutTemplateDay { Label = "Day 2", DayOfWeek = DayOfWeek.Tuesday, OrderNumber = 2 });
+            template.Days.Add(new WorkoutTemplateDay { Label = "Day 3", DayOfWeek = DayOfWeek.Wednesday, OrderNumber = 3 });
         }
     }
 
     private void AddDay()
     {
-        var available = Enum.GetValues<DayOfWeek>().Except(template.Days.Select(d => d.DayOfWeek)).ToList();
-        if (!available.Any()) return;
-        var day = new WorkoutTemplateDay { DayOfWeek = available.First() };
+        var nextOrder = template.Days.Any() ? template.Days.Max(d => d.OrderNumber) + 1 : 1;
+        var day = new WorkoutTemplateDay
+        {
+            Label = $"Day {nextOrder}",
+            DayOfWeek = DayOfWeek.Monday,
+            OrderNumber = nextOrder
+        };
         template.Days.Add(day);
-        newExerciseDayId[day.DayOfWeek] = 0;
         StateHasChanged();
     }
 
     private void RemoveDay(WorkoutTemplateDay day)
     {
         template.Days.Remove(day);
-        newExerciseDayId.Remove(day.DayOfWeek);
+        ReorderDays();
         StateHasChanged();
     }
 
@@ -92,16 +84,16 @@ public partial class WorkoutTemplateFormBase : ComponentBase
             }
             else
             {
-                selectedExerciseId[day.DayOfWeek] = exId;
+                selectedExerciseId[day.Label] = exId;
                 AddExerciseToDay(day);
-                selectedExerciseId[day.DayOfWeek] = 0;
+                selectedExerciseId[day.Label] = 0;
             }
             StateHasChanged();
         }
     }
     private void AddExerciseToDay(WorkoutTemplateDay day)
     {
-        if (!selectedExerciseId.TryGetValue(day.DayOfWeek, out var exId) || exId == 0) return;
+        if (!selectedExerciseId.TryGetValue(day.Label, out var exId) || exId == 0) return;
         if (day.Exercises.Any(e => e.ExerciseId == exId)) return;
         var exercise = allExercises.FirstOrDefault(e => e.Id == exId);
         if (exercise == null) return;
@@ -113,48 +105,48 @@ public partial class WorkoutTemplateFormBase : ComponentBase
         };
         day.Exercises.Add(ex);
 
-        selectedMuscleGroup[day.DayOfWeek] = null;
-        selectedExerciseId[day.DayOfWeek] = 0;
+        selectedMuscleGroup[day.Label] = null;
+        selectedExerciseId[day.Label] = 0;
         StateHasChanged();
     }
 
-    private void OnMuscleGroupChanged(DayOfWeek day, object value)
+    private void OnMuscleGroupChanged(string label, object value)
     {
         if (Enum.TryParse<MuscleGroups>(value?.ToString(), out var muscleGroup))
-            selectedMuscleGroup[day] = muscleGroup;
+            selectedMuscleGroup[label] = muscleGroup;
         else
-            selectedMuscleGroup[day] = null;
-        selectedExerciseId[day] = 0;
+            selectedMuscleGroup[label] = null;
+        selectedExerciseId[label] = 0;
     }
-    private void RemoveSelectedMuscleGroup(DayOfWeek dayOfWeek)
+    private void RemoveSelectedMuscleGroup(string label)
     {
-        if (selectedMuscleGroup.ContainsKey(dayOfWeek))
+        if (selectedMuscleGroup.ContainsKey(label))
         {
-            selectedMuscleGroup.Remove(dayOfWeek);
+            selectedMuscleGroup.Remove(label);
             StateHasChanged();
         }
     }
-    private void StartEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
+    private void StartEditingExercise(string label, int exerciseId)
     {
-        editingExercises.Add((dayOfWeek, exerciseId));
-        var day = template.Days.FirstOrDefault(d => d.DayOfWeek == dayOfWeek);
+        editingExercises.Add((label, exerciseId));
+        var day = template.Days.FirstOrDefault(d => d.Label == label);
         var ex = day?.Exercises.FirstOrDefault(e => e.Exercise?.Id == exerciseId);
 
         if (ex?.Exercise != null)
         {
             var muscleGroup = ex.Exercise.ExerciseMuscleGroups.FirstOrDefault()?.MuscleGroup;
             if (muscleGroup != null)
-                editingMuscleGroup[(dayOfWeek, exerciseId)] = Enum.Parse<MuscleGroups>(muscleGroup.Name);
+                editingMuscleGroup[(label, exerciseId)] = Enum.Parse<MuscleGroups>(muscleGroup.Name);
         }
     }
-    private void StopEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
+    private void StopEditingExercise(string label, int exerciseId)
     {
-        editingExercises.Remove((dayOfWeek, exerciseId));
-        editingMuscleGroup.Remove((dayOfWeek, exerciseId));
+        editingExercises.Remove((label, exerciseId));
+        editingMuscleGroup.Remove((label, exerciseId));
     }
-    private IEnumerable<Exercise> GetExercisesForDay(DayOfWeek dayOfWeek)
+    private IEnumerable<Exercise> GetExercisesForDay(string label)
     {
-        if (selectedMuscleGroup.TryGetValue(dayOfWeek, out var muscleGroup) && muscleGroup != null)
+        if (selectedMuscleGroup.TryGetValue(label, out var muscleGroup) && muscleGroup != null)
         {
             return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == muscleGroup.ToString()));
         }
@@ -170,12 +162,24 @@ public partial class WorkoutTemplateFormBase : ComponentBase
     {
         if (value is null) return;
         if (!Enum.TryParse<DayOfWeek>(value.ToString(), out var newDayOfWeek)) return;
-        if (template.Days.Any(d => d != day && d.DayOfWeek == newDayOfWeek)) return;
-        newExerciseDayId.Remove(day.DayOfWeek);
         day.DayOfWeek = newDayOfWeek;
-        if (!newExerciseDayId.ContainsKey(newDayOfWeek))
-            newExerciseDayId[newDayOfWeek] = 0;
         StateHasChanged();
+    }
+
+    private void OnLabelChanged(WorkoutTemplateDay day, object? value)
+    {
+        if (value is null) return;
+        day.Label = value.ToString() ?? string.Empty;
+        StateHasChanged();
+    }
+
+    private void ReorderDays()
+    {
+        int order = 1;
+        foreach (var d in template.Days.OrderBy(d => d.OrderNumber))
+        {
+            d.OrderNumber = order++;
+        }
     }
 
     private async Task HandleSubmit()

@@ -4,9 +4,19 @@
 
 <div class="bg-stone-50 rounded w-[250px] min-w-[250px] max-w-[250px] flex flex-col border border-1 border-gray-400">
     <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
-        <InputText class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   @bind-Value="Day.Label"
-                   @onchange="e => LabelChanged?.Invoke(Day, e.Value)" />
+        <div class="flex gap-2">
+            <InputSelect class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         @bind-Value="Day.DayOfWeek"
+                         @onchange="e => DayOfWeekChanged?.Invoke(Day, e.Value)">
+                @foreach (var dow in Enum.GetValues<DayOfWeek>())
+                {
+                    <option value="@dow">@dow</option>
+                }
+            </InputSelect>
+            <InputText class="block w-auto text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       @bind-Value="Day.Label"
+                       @onchange="e => LabelChanged?.Invoke(Day, e.Value)" />
+        </div>
         <button type="button" class="p-1 text-gray-700 hover:text-red-600 transition cursor-pointer" @onclick="() => RemoveDay?.Invoke(Day)">
             <i class="bi bi-trash"></i>
         </button>
@@ -30,6 +40,7 @@
     [Parameter] public Dictionary<string, MuscleGroups?> SelectedMuscleGroup { get; set; } = new();
     [Parameter] public Action<WorkoutDay>? RemoveDay { get; set; }
     [Parameter] public Action<WorkoutDay, object?>? LabelChanged { get; set; }
+    [Parameter] public Action<WorkoutDay, object?>? DayOfWeekChanged { get; set; }
     [Parameter] public Action<WorkoutDay, object, WorkoutDayExercise?>? ExerciseSelected { get; set; }
     [Parameter] public Action<string, object>? MuscleGroupChanged { get; set; }
     [Parameter] public Action<string>? RemoveSelectedMuscleGroup { get; set; }

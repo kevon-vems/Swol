@@ -67,6 +67,9 @@ public class ApplicationDbContext : DbContext
             .WithMany(w => w.Days)
             .HasForeignKey(wd => wd.WorkoutId);
         modelBuilder.Entity<WorkoutDay>()
+            .Property(wd => wd.DayOfWeek)
+            .IsRequired();
+        modelBuilder.Entity<WorkoutDay>()
             .Property(wd => wd.Label)
             .IsRequired();
         modelBuilder.Entity<WorkoutDay>()

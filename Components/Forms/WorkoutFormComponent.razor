@@ -58,6 +58,7 @@
                                 SelectedMuscleGroup="selectedMuscleGroup"
                                 RemoveDay="RemoveDay"
                                 LabelChanged="OnLabelChanged"
+                                DayOfWeekChanged="OnDayOfWeekChanged"
                                 ExerciseSelected="OnExerciseSelected"
                                 MuscleGroupChanged="OnMuscleGroupChanged"
                                 RemoveSelectedMuscleGroup="RemoveSelectedMuscleGroup"
@@ -117,9 +118,9 @@
         else
         {
             workout = new Workout();
-            workout.Days.Add(new WorkoutDay { Label = "Day 1", OrderNumber = 1 });
-            workout.Days.Add(new WorkoutDay { Label = "Day 2", OrderNumber = 2 });
-            workout.Days.Add(new WorkoutDay { Label = "Day 3", OrderNumber = 3 });
+            workout.Days.Add(new WorkoutDay { Label = "Day 1", DayOfWeek = DayOfWeek.Monday, OrderNumber = 1 });
+            workout.Days.Add(new WorkoutDay { Label = "Day 2", DayOfWeek = DayOfWeek.Tuesday, OrderNumber = 2 });
+            workout.Days.Add(new WorkoutDay { Label = "Day 3", DayOfWeek = DayOfWeek.Wednesday, OrderNumber = 3 });
         }
     }
 
@@ -130,6 +131,7 @@
         var day = new WorkoutDay
         {
             Label = $"Day {dayCountInWeek}",
+            DayOfWeek = DayOfWeek.Monday,
             WeekNumber = currentWeek,
             OrderNumber = nextOrder
         };
@@ -234,6 +236,14 @@
         StateHasChanged();
     }
 
+    private void OnDayOfWeekChanged(WorkoutDay day, object? value)
+    {
+        if (value is null) return;
+        if (!Enum.TryParse<DayOfWeek>(value.ToString(), out var newDayOfWeek)) return;
+        day.DayOfWeek = newDayOfWeek;
+        StateHasChanged();
+    }
+
     private void ChangeWeek(int delta)
     {
         currentWeek += delta;
@@ -272,10 +282,9 @@
             int dayNumber = 1;
             foreach (var wDay in workout.Days.OrderBy(d => d.OrderNumber))
             {
-                var dow = Enum.TryParse<DayOfWeek>(wDay.Label, out var parsed) ? parsed : DayOfWeek.Sunday;
                 var tDay = new WorkoutTemplateDay
                 {
-                    DayOfWeek = dow,
+                    DayOfWeek = wDay.DayOfWeek,
                     DayNumber = dayNumber++,
                 };
 
@@ -319,35 +328,34 @@
 
         for (int i = 0; i < 7; i++)
         {
+            var templateDay = template?.Days.FirstOrDefault(d => d.DayNumber == i + 1);
+            var dow = templateDay?.DayOfWeek ?? (DayOfWeek)i;
             var wDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
-                Label = $"Day {i + 1}",
+                DayOfWeek = dow,
+                Label = dow.ToString(),
                 WeekNumber = 1,
                 OrderNumber = i + 1,
-                Name = $"Day {i + 1}"
+                Name = dow.ToString()
             };
             Db.WorkoutDays.Add(wDay);
             await Db.SaveChangesAsync();
 
-            if (template != null)
+            if (templateDay != null)
             {
-                var tDay = template.Days.FirstOrDefault(d => d.DayNumber == i + 1);
-                if (tDay != null)
+                foreach (var tEx in templateDay.Exercises.OrderBy(e => e.OrderInDay))
                 {
-                    foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))
+                    var wEx = new WorkoutDayExercise
                     {
-                        var wEx = new WorkoutDayExercise
-                        {
-                            WorkoutDayId = wDay.Id,
-                            ExerciseId = tEx.ExerciseId,
-                            OrderInDay = tEx.OrderInDay
-                        };
-                        Db.WorkoutDayExercises.Add(wEx);
-                    }
-
-                    await Db.SaveChangesAsync();
+                        WorkoutDayId = wDay.Id,
+                        ExerciseId = tEx.ExerciseId,
+                        OrderInDay = tEx.OrderInDay
+                    };
+                    Db.WorkoutDayExercises.Add(wEx);
                 }
+
+                await Db.SaveChangesAsync();
             }
         }
     }

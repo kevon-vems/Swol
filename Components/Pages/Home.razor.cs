@@ -61,10 +61,11 @@ public partial class Home : ComponentBase
             var wDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
-                Label = $"Day {tDay.DayNumber}",
+                DayOfWeek = tDay.DayOfWeek,
+                Label = tDay.DayOfWeek.ToString(),
                 WeekNumber = weekNumber,
                 OrderNumber = orderNumber++,
-                Name = $"Day {tDay.DayNumber}"
+                Name = tDay.DayOfWeek.ToString()
             };
             Db.WorkoutDays.Add(wDay);
             await Db.SaveChangesAsync();

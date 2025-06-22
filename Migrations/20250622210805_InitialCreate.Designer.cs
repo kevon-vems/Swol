@@ -623,10 +623,14 @@ namespace Swol.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DayNumber")
+                    b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.Property<int>("DayOfWeek")
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderNumber")
                         .HasColumnType("int");
 
                     b.Property<int>("WorkoutTemplateId")

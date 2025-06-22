@@ -279,13 +279,13 @@
                 CreatedOn = DateTime.UtcNow
             };
 
-            int dayNumber = 1;
             foreach (var workoutDay in workout.Days.OrderBy(d => d.OrderNumber))
             {
                 var templateDay = new WorkoutTemplateDay
                 {
                     DayOfWeek = workoutDay.DayOfWeek,
-                    DayNumber = dayNumber++,
+                    Label = workoutDay.Label,
+                    OrderNumber = workoutDay.OrderNumber,
                 };
 
                 foreach (var workoutExercise in workoutDay.Exercises.OrderBy(e => e.OrderInDay))
@@ -328,16 +328,16 @@
 
         for (int i = 0; i < 7; i++)
         {
-            var templateDay = template?.Days.FirstOrDefault(d => d.DayNumber == i + 1);
+            var templateDay = template?.Days.FirstOrDefault(d => d.OrderNumber == i + 1);
             var dow = templateDay?.DayOfWeek ?? (DayOfWeek)i;
             var workoutDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
                 DayOfWeek = dow,
-                Label = dow.ToString(),
+                Label = templateDay?.Label ?? dow.ToString(),
                 WeekNumber = 1,
                 OrderNumber = i + 1,
-                Name = dow.ToString()
+                Name = templateDay?.Label ?? dow.ToString()
             };
             Db.WorkoutDays.Add(workoutDay);
             await Db.SaveChangesAsync();

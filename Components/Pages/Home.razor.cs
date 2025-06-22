@@ -56,16 +56,16 @@ public partial class Home : ComponentBase
 
         int weekNumber = 1;
         int orderNumber = 1;
-        foreach (var templateDay in template.Days.OrderBy(d => d.DayNumber))
+        foreach (var templateDay in template.Days.OrderBy(d => d.OrderNumber))
         {
             var workoutDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
                 DayOfWeek = templateDay.DayOfWeek,
-                Label = templateDay.DayOfWeek.ToString(),
+                Label = templateDay.Label,
                 WeekNumber = weekNumber,
                 OrderNumber = orderNumber++,
-                Name = templateDay.DayOfWeek.ToString()
+                Name = templateDay.Label
             };
             Db.WorkoutDays.Add(workoutDay);
             await Db.SaveChangesAsync();

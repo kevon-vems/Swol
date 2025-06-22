@@ -109,7 +109,8 @@ namespace Swol.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     WorkoutTemplateId = table.Column<int>(type: "int", nullable: false),
                     DayOfWeek = table.Column<int>(type: "int", nullable: false),
-                    DayNumber = table.Column<int>(type: "int", nullable: false)
+                    Label = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrderNumber = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

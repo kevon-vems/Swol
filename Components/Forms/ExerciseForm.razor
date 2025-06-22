@@ -1,7 +1,9 @@
 @using Swol.Data.Models.Config
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
 @inject Swol.Data.ApplicationDbContext Db
 @inject NavigationManager Navigation
+@inject ILogger<ExerciseForm> Logger
 
 <PageTitle>@PageTitle</PageTitle>
 
@@ -51,21 +53,29 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        muscleGroups = await Db.MuscleGroups.OrderBy(mg => mg.Name).ToListAsync();
-
-        if (Id.HasValue)
+        try
         {
-            exercise = await Db.Exercises
-                .Include(e => e.ExerciseMuscleGroups)
-                .FirstOrDefaultAsync(e => e.Id == Id.Value) ?? new Exercise();
+            muscleGroups = await Db.MuscleGroups.OrderBy(mg => mg.Name).ToListAsync();
 
-            selectedMuscleGroupIds = exercise.ExerciseMuscleGroups
-                .Select(emg => emg.MuscleGroupId).ToList();
+            if (Id.HasValue)
+            {
+                exercise = await Db.Exercises
+                    .Include(e => e.ExerciseMuscleGroups)
+                    .FirstOrDefaultAsync(e => e.Id == Id.Value) ?? new Exercise();
+
+                selectedMuscleGroupIds = exercise.ExerciseMuscleGroups
+                    .Select(emg => emg.MuscleGroupId).ToList();
+            }
+            else
+            {
+                exercise = new Exercise();
+                selectedMuscleGroupIds = new List<int>();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            exercise = new Exercise();
-            selectedMuscleGroupIds = new List<int>();
+            Logger.LogError(ex, "Error loading ExerciseForm for Id {Id}", Id);
+            throw;
         }
     }
 

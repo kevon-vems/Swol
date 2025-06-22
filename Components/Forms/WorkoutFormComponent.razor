@@ -14,7 +14,15 @@
 <div class="max-w-4xl mx-auto p-4 space-y-6">
 
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">@PageTitle</h1>
+    <div class="flex">
+        @if (Id.HasValue)
+        {
+            <button type="button" class="text-red-600 text-xl mr-4" @onclick="DeleteWorkout">
+                <i class="bi bi-trash"></i>
+            </button>
+        }
+        <div class="text-2xl font-bold">@PageTitle</div>
+    </div>
     <button type="submit" form="WorkoutCreateForm" class="text-blue-600 hover:text-blue-800 text-2xl">
         <i class="bi bi-save"></i>
     </button>
@@ -65,14 +73,7 @@
             }
         </div>
     </div>
-    <div class="flex items-center mt-6">
-        @if (Id.HasValue)
-        {
-            <button type="button" class="text-red-600 text-xl" @onclick="DeleteWorkout">
-                <i class="bi bi-trash"></i>
-            </button>
-        }
-    </div>
+    
 </EditForm>
 
 </div>

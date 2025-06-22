@@ -94,6 +94,19 @@
 
     private async Task SaveAsync()
     {
+        if (workoutDay is null)
+            return;
+
+        foreach (var exercise in workoutDay.Exercises)
+        {
+            exercise.IsCompleted = exercise.Sets.All(s => s.Reps > 0);
+        }
+
+        if (workoutDay.Exercises.All(e => e.IsCompleted))
+        {
+            workoutDay.IsCompleted = true;
+        }
+
         await Db.SaveChangesAsync();
     }
 }

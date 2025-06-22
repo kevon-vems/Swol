@@ -130,6 +130,10 @@ namespace Swol.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     WorkoutId = table.Column<int>(type: "int", nullable: false),
                     DayOfWeek = table.Column<int>(type: "int", nullable: false),
+                    Label = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WeekNumber = table.Column<int>(type: "int", nullable: false),
+                    OrderNumber = table.Column<int>(type: "int", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -178,7 +182,8 @@ namespace Swol.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     WorkoutDayId = table.Column<int>(type: "int", nullable: false),
                     OrderInDay = table.Column<int>(type: "int", nullable: false),
-                    ExerciseId = table.Column<int>(type: "int", nullable: false)
+                    ExerciseId = table.Column<int>(type: "int", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

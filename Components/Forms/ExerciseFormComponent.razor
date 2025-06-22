@@ -42,18 +42,18 @@
                 <div class="flex-1">
                     <h3 class="text-sm font-semibold mb-2">Selected</h3>
                     <div class="flex flex-wrap gap-2">
-                        @foreach (var mg in muscleGroups.Where(mg => selectedMuscleGroupIds.Contains(mg.Id)))
+                        @foreach (var group in muscleGroups.Where(mg => selectedMuscleGroupIds.Contains(mg.Id)))
                         {
-                            <button type="button" class="px-3 py-2 bg-blue-600 text-white rounded" @onclick="() => RemoveMuscleGroup(mg.Id)">@mg.Name</button>
+                            <button type="button" class="px-3 py-2 bg-blue-600 text-white rounded" @onclick="() => RemoveMuscleGroup(group.Id)">@group.Name</button>
                         }
                     </div>
                 </div>
                 <div class="flex-1">
                     <h3 class="text-sm font-semibold mb-2">Available</h3>
                     <div class="flex flex-wrap gap-2">
-                        @foreach (var mg in muscleGroups.Where(mg => !selectedMuscleGroupIds.Contains(mg.Id)))
+                        @foreach (var group in muscleGroups.Where(mg => !selectedMuscleGroupIds.Contains(mg.Id)))
                         {
-                            <button type="button" class="px-3 py-2 bg-gray-200 text-black rounded" @onclick="() => AddMuscleGroup(mg.Id)">@mg.Name</button>
+                            <button type="button" class="px-3 py-2 bg-gray-200 text-black rounded" @onclick="() => AddMuscleGroup(group.Id)">@group.Name</button>
                         }
                     </div>
                 </div>
@@ -125,9 +125,9 @@
         var existing = Db.ExerciseMuscleGroups.Where(emg => emg.ExerciseId == exercise.Id);
         Db.ExerciseMuscleGroups.RemoveRange(existing);
 
-        foreach (var mgId in selectedMuscleGroupIds)
+        foreach (var muscleGroupId in selectedMuscleGroupIds)
         {
-            Db.ExerciseMuscleGroups.Add(new ExerciseMuscleGroup { ExerciseId = exercise.Id, MuscleGroupId = mgId });
+            Db.ExerciseMuscleGroups.Add(new ExerciseMuscleGroup { ExerciseId = exercise.Id, MuscleGroupId = muscleGroupId });
         }
 
         await Db.SaveChangesAsync();

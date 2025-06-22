@@ -188,8 +188,8 @@
 
     private void OnMuscleGroupChanged(string day, object value)
     {
-        if (Enum.TryParse<MuscleGroups>(value?.ToString(), out var mg))
-            selectedMuscleGroup[day] = mg;
+        if (Enum.TryParse<MuscleGroups>(value?.ToString(), out var muscleGroup))
+            selectedMuscleGroup[day] = muscleGroup;
         else
             selectedMuscleGroup[day] = null;
         selectedExerciseId[day] = 0;
@@ -216,9 +216,9 @@
 
     private IEnumerable<Exercise> GetExercisesForDay(string label)
     {
-        if (selectedMuscleGroup.TryGetValue(label, out var mg) && mg != null)
+        if (selectedMuscleGroup.TryGetValue(label, out var muscleGroup) && muscleGroup != null)
         {
-            return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == mg.ToString()));
+            return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == muscleGroup.ToString()));
         }
         return Enumerable.Empty<Exercise>();
     }
@@ -280,25 +280,25 @@
             };
 
             int dayNumber = 1;
-            foreach (var wDay in workout.Days.OrderBy(d => d.OrderNumber))
+            foreach (var workoutDay in workout.Days.OrderBy(d => d.OrderNumber))
             {
-                var tDay = new WorkoutTemplateDay
+                var templateDay = new WorkoutTemplateDay
                 {
-                    DayOfWeek = wDay.DayOfWeek,
+                    DayOfWeek = workoutDay.DayOfWeek,
                     DayNumber = dayNumber++,
                 };
 
-                foreach (var wEx in wDay.Exercises.OrderBy(e => e.OrderInDay))
+                foreach (var workoutExercise in workoutDay.Exercises.OrderBy(e => e.OrderInDay))
                 {
-                    var tEx = new WorkoutTemplateDayExercise
+                    var templateExercise = new WorkoutTemplateDayExercise
                     {
-                        ExerciseId = wEx.ExerciseId,
-                        OrderInDay = wEx.OrderInDay
+                        ExerciseId = workoutExercise.ExerciseId,
+                        OrderInDay = workoutExercise.OrderInDay
                     };
-                    tDay.Exercises.Add(tEx);
+                    templateDay.Exercises.Add(templateExercise);
                 }
 
-                template.Days.Add(tDay);
+                template.Days.Add(templateDay);
             }
 
             Db.WorkoutTemplates.Add(template);
@@ -330,7 +330,7 @@
         {
             var templateDay = template?.Days.FirstOrDefault(d => d.DayNumber == i + 1);
             var dow = templateDay?.DayOfWeek ?? (DayOfWeek)i;
-            var wDay = new WorkoutDay
+            var workoutDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
                 DayOfWeek = dow,
@@ -339,20 +339,20 @@
                 OrderNumber = i + 1,
                 Name = dow.ToString()
             };
-            Db.WorkoutDays.Add(wDay);
+            Db.WorkoutDays.Add(workoutDay);
             await Db.SaveChangesAsync();
 
             if (templateDay != null)
             {
-                foreach (var tEx in templateDay.Exercises.OrderBy(e => e.OrderInDay))
+                foreach (var templateExercise in templateDay.Exercises.OrderBy(e => e.OrderInDay))
                 {
-                    var wEx = new WorkoutDayExercise
+                    var workoutExercise = new WorkoutDayExercise
                     {
-                        WorkoutDayId = wDay.Id,
-                        ExerciseId = tEx.ExerciseId,
-                        OrderInDay = tEx.OrderInDay
+                        WorkoutDayId = workoutDay.Id,
+                        ExerciseId = templateExercise.ExerciseId,
+                        OrderInDay = templateExercise.OrderInDay
                     };
-                    Db.WorkoutDayExercises.Add(wEx);
+                    Db.WorkoutDayExercises.Add(workoutExercise);
                 }
 
                 await Db.SaveChangesAsync();

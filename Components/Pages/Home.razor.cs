@@ -56,31 +56,31 @@ public partial class Home : ComponentBase
 
         int weekNumber = 1;
         int orderNumber = 1;
-        foreach (var tDay in template.Days.OrderBy(d => d.DayNumber))
+        foreach (var templateDay in template.Days.OrderBy(d => d.DayNumber))
         {
-            var wDay = new WorkoutDay
+            var workoutDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
-                DayOfWeek = tDay.DayOfWeek,
-                Label = tDay.DayOfWeek.ToString(),
+                DayOfWeek = templateDay.DayOfWeek,
+                Label = templateDay.DayOfWeek.ToString(),
                 WeekNumber = weekNumber,
                 OrderNumber = orderNumber++,
-                Name = tDay.DayOfWeek.ToString()
+                Name = templateDay.DayOfWeek.ToString()
             };
-            Db.WorkoutDays.Add(wDay);
+            Db.WorkoutDays.Add(workoutDay);
             await Db.SaveChangesAsync();
 
-            if (tDay != null)
+            if (templateDay != null)
             {
-                foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))
+                foreach (var templateExercise in templateDay.Exercises.OrderBy(e => e.OrderInDay))
                 {
-                    var wEx = new WorkoutDayExercise
+                    var workoutExercise = new WorkoutDayExercise
                     {
-                        WorkoutDayId = wDay.Id,
-                        ExerciseId = tEx.ExerciseId,
-                        OrderInDay = tEx.OrderInDay
+                        WorkoutDayId = workoutDay.Id,
+                        ExerciseId = templateExercise.ExerciseId,
+                        OrderInDay = templateExercise.OrderInDay
                     };
-                    Db.WorkoutDayExercises.Add(wEx);
+                    Db.WorkoutDayExercises.Add(workoutExercise);
                 }
             }
 

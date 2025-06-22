@@ -40,17 +40,17 @@
             </div>
         }
 
-        @if (!Day.Exercises.Any() && (!SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var msg) || msg == null))
+        @if (!Day.Exercises.Any() && (!SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var group) || group == null))
         {
             <div class="text-gray-700">No exercises</div>
         }
 
-        @if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var selMg) && selMg != null)
+        @if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var selectedGroup) && selectedGroup != null)
         {
             <div class="mb-2 rounded border border-gray-200">
                 <div class="flex items-center justify-between bg-blue-600 p-1 rounded-t pl-2">
                     <span class="text-white text-sm font-semibold">
-                        @selMg
+                        @selectedGroup
                     </span>
                     <button type="button" class="p-1 text-white hover:text-red-200 transition" title="Remove Muscle Group" @onclick="() => RemoveSelectedMuscleGroup?.Invoke(Day.DayOfWeek)">
                         <i class="bi bi-x-circle"></i>
@@ -71,18 +71,18 @@
             </div>
         }
 
-        @if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && (!SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var selMg2) || selMg2 == null))
+        @if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && (!SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var selectedGroup2) || selectedGroup2 == null))
         {
             <select class="block w-full text-sm border border-gray-300 rounded px-2 py-1 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     @onchange="e => MuscleGroupChanged?.Invoke(Day.DayOfWeek, e?.Value ?? string.Empty)">
                 <option value="">-- Select Muscle Group --</option>
-                @foreach (var mg in Enum.GetValues<MuscleGroups>())
+                @foreach (var group in Enum.GetValues<MuscleGroups>())
                 {
-                    <option value="@mg">@mg</option>
+                    <option value="@group">@group</option>
                 }
             </select>
         }
-        else if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var mg) && mg != null && !GetExercisesForDay(Day.DayOfWeek).Any())
+        else if (!Day.Exercises.Any(ex => EditingExercises.Contains((Day.DayOfWeek, ex.Exercise?.Id ?? 0))) && SelectedMuscleGroup.TryGetValue(Day.DayOfWeek, out var muscleGroup) && muscleGroup != null && !GetExercisesForDay(Day.DayOfWeek).Any())
         {
             <div class="text-gray-400 mb-2">No exercises for this muscle group.</div>
         }

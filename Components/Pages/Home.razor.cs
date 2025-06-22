@@ -27,6 +27,17 @@ public partial class Home : ComponentBase
         if (activeTemplate == null)
             return;
 
+        var existingWorkout = await Db.Workouts
+            .FirstOrDefaultAsync(w =>
+                w.WorkoutTemplateId == activeTemplate.Id &&
+                w.StartDate == DateTime.Today);
+
+        if (existingWorkout != null)
+        {
+            Nav.NavigateTo($"/workouts/{existingWorkout.Id}");
+            return;
+        }
+
         var workout = new Workout
         {
             Name = $"{activeTemplate.Name} - {DateTime.Today:yyyy-MM-dd}",
@@ -50,7 +61,7 @@ public partial class Home : ComponentBase
             var dow = startDate.AddDays(i).DayOfWeek;
             var wDay = new WorkoutDay
             {
-                Id = workout.Id,
+                WorkoutId = workout.Id,
                 DayOfWeek = dow,
                 Name = dow.ToString()
             };

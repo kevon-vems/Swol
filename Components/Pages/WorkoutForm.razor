@@ -1,8 +1,9 @@
 @page "/workouts/form/{Id:int?}"
 @page "/workouts/create"
 @page "/workouts/edit/{Id:int}"
+@using Swol.Components.Forms
 
-<Components.Forms.WorkoutForm Id="@Id" />
+<WorkoutFormComponent Id="@Id" />
 
 @code {
     [Parameter] public int? Id { get; set; }

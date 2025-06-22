@@ -54,21 +54,21 @@ public partial class Home : ComponentBase
                 .ThenInclude(d => d.Exercises)
             .FirstAsync(t => t.Id == activeTemplate.Id);
 
-        var startDate = workout.StartDate ?? DateTime.Today;
-
-        for (int i = 0; i < 7; i++)
+        int weekNumber = 1;
+        int orderNumber = 1;
+        foreach (var tDay in template.Days.OrderBy(d => d.DayNumber))
         {
-            var dow = startDate.AddDays(i).DayOfWeek;
             var wDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
-                DayOfWeek = dow,
-                Name = dow.ToString()
+                Label = $"Day {tDay.DayNumber}",
+                WeekNumber = weekNumber,
+                OrderNumber = orderNumber++,
+                Name = $"Day {tDay.DayNumber}"
             };
             Db.WorkoutDays.Add(wDay);
             await Db.SaveChangesAsync();
 
-            var tDay = template.Days.FirstOrDefault(d => d.DayOfWeek == dow);
             if (tDay != null)
             {
                 foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))
@@ -81,9 +81,9 @@ public partial class Home : ComponentBase
                     };
                     Db.WorkoutDayExercises.Add(wEx);
                 }
-
-                await Db.SaveChangesAsync();
             }
+
+            await Db.SaveChangesAsync();
         }
 
         await Db.SaveChangesAsync();

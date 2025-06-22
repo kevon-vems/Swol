@@ -44,15 +44,20 @@
         <label for="saveTemplate" class="text-sm font-medium text-gray-700">Save as template</label>
     </div>
     <div class="mb-3">
+        <div class="flex items-center justify-between mb-2">
+            <button type="button" class="px-2 py-1 text-sm rounded border" @onclick="() => ChangeWeek(-1)" disabled="@(currentWeek == 1)">Prev</button>
+            <span class="font-semibold">Week @currentWeek</span>
+            <button type="button" class="px-2 py-1 text-sm rounded border" @onclick="() => ChangeWeek(1)" disabled="@(currentWeek >= MaxWeek)">Next</button>
+        </div>
         <div class="flex flex-row gap-2 overflow-x-auto flex-nowrap items-start w-full max-w-screen sm:max-w-[calc(100vw-250px)]">
-            @foreach (var day in workout.Days.OrderBy(d => d.DayOfWeek))
+            @foreach (var day in workout.Days.Where(d => d.WeekNumber == currentWeek).OrderBy(d => d.OrderNumber))
             {
                 <WorkoutDayCard Day="day"
                                 WorkoutDays="workout.Days"
                                 EditingExercises="editingExercises"
                                 SelectedMuscleGroup="selectedMuscleGroup"
                                 RemoveDay="RemoveDay"
-                                DayOfWeekChanged="OnDayOfWeekChanged"
+                                LabelChanged="OnLabelChanged"
                                 ExerciseSelected="OnExerciseSelected"
                                 MuscleGroupChanged="OnMuscleGroupChanged"
                                 RemoveSelectedMuscleGroup="RemoveSelectedMuscleGroup"
@@ -61,7 +66,7 @@
                                 StopEditingExercise="StopEditingExercise"
                                 GetExercisesForDay="GetExercisesForDay" />
             }
-            @if (workout.Days.Count < 7)
+            @if (workout.Days.Count(d => d.WeekNumber == currentWeek) < 7)
             {
                 <div class="bg-stone-50 rounded w-[250px] min-w-[250px] max-w-[250px] flex flex-col border border-1 border-gray-400 p-2">
                     <button type="button"
@@ -84,9 +89,11 @@
     private Workout workout = new();
     private bool saveAsTemplate;
     private List<Exercise> allExercises = new();
-    private Dictionary<DayOfWeek, MuscleGroups?> selectedMuscleGroup = new();
-    private Dictionary<DayOfWeek, int> selectedExerciseId = new();
-    private HashSet<(DayOfWeek, int)> editingExercises = new();
+    private Dictionary<string, MuscleGroups?> selectedMuscleGroup = new();
+    private Dictionary<string, int> selectedExerciseId = new();
+    private HashSet<(string, int)> editingExercises = new();
+    private int currentWeek = 1;
+    private int MaxWeek => Math.Max(workout.NumberOfWeeks, workout.Days.Any() ? workout.Days.Max(d => d.WeekNumber) : 1);
     private string PageTitle => Id.HasValue ? "Edit Workout" : "Add Workout";
 
     protected override async Task OnInitializedAsync()
@@ -110,21 +117,22 @@
         else
         {
             workout = new Workout();
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Sunday });
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Monday });
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Tuesday });
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Wednesday });
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Thursday });
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Friday });
-            workout.Days.Add(new WorkoutDay { DayOfWeek = DayOfWeek.Saturday });
+            workout.Days.Add(new WorkoutDay { Label = "Day 1", OrderNumber = 1 });
+            workout.Days.Add(new WorkoutDay { Label = "Day 2", OrderNumber = 2 });
+            workout.Days.Add(new WorkoutDay { Label = "Day 3", OrderNumber = 3 });
         }
     }
 
     private void AddDay()
     {
-        var available = Enum.GetValues<DayOfWeek>().Except(workout.Days.Select(d => d.DayOfWeek)).ToList();
-        if (!available.Any()) return;
-        var day = new WorkoutDay { DayOfWeek = available.First() };
+        var nextOrder = workout.Days.Any() ? workout.Days.Max(d => d.OrderNumber) + 1 : 1;
+        var dayCountInWeek = workout.Days.Count(d => d.WeekNumber == currentWeek) + 1;
+        var day = new WorkoutDay
+        {
+            Label = $"Day {dayCountInWeek}",
+            WeekNumber = currentWeek,
+            OrderNumber = nextOrder
+        };
         workout.Days.Add(day);
         StateHasChanged();
     }
@@ -132,6 +140,7 @@
     private void RemoveDay(WorkoutDay day)
     {
         workout.Days.Remove(day);
+        ReorderDays();
         StateHasChanged();
     }
 
@@ -148,9 +157,9 @@
             }
             else
             {
-                selectedExerciseId[day.DayOfWeek] = exId;
+                selectedExerciseId[day.Label] = exId;
                 AddExerciseToDay(day);
-                selectedExerciseId[day.DayOfWeek] = 0;
+                selectedExerciseId[day.Label] = 0;
             }
             StateHasChanged();
         }
@@ -158,7 +167,7 @@
 
     private void AddExerciseToDay(WorkoutDay day)
     {
-        if (!selectedExerciseId.TryGetValue(day.DayOfWeek, out var exId) || exId == 0) return;
+        if (!selectedExerciseId.TryGetValue(day.Label, out var exId) || exId == 0) return;
         if (day.Exercises.Any(e => e.ExerciseId == exId)) return;
         var exercise = allExercises.FirstOrDefault(e => e.Id == exId);
         if (exercise == null) return;
@@ -170,12 +179,12 @@
         };
         day.Exercises.Add(ex);
 
-        selectedMuscleGroup[day.DayOfWeek] = null;
-        selectedExerciseId[day.DayOfWeek] = 0;
+        selectedMuscleGroup[day.Label] = null;
+        selectedExerciseId[day.Label] = 0;
         StateHasChanged();
     }
 
-    private void OnMuscleGroupChanged(DayOfWeek day, object value)
+    private void OnMuscleGroupChanged(string day, object value)
     {
         if (Enum.TryParse<MuscleGroups>(value?.ToString(), out var mg))
             selectedMuscleGroup[day] = mg;
@@ -184,28 +193,28 @@
         selectedExerciseId[day] = 0;
     }
 
-    private void RemoveSelectedMuscleGroup(DayOfWeek dayOfWeek)
+    private void RemoveSelectedMuscleGroup(string label)
     {
-        if (selectedMuscleGroup.ContainsKey(dayOfWeek))
+        if (selectedMuscleGroup.ContainsKey(label))
         {
-            selectedMuscleGroup.Remove(dayOfWeek);
+            selectedMuscleGroup.Remove(label);
             StateHasChanged();
         }
     }
 
-    private void StartEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
+    private void StartEditingExercise(string label, int exerciseId)
     {
-        editingExercises.Add((dayOfWeek, exerciseId));
+        editingExercises.Add((label, exerciseId));
     }
 
-    private void StopEditingExercise(DayOfWeek dayOfWeek, int exerciseId)
+    private void StopEditingExercise(string label, int exerciseId)
     {
-        editingExercises.Remove((dayOfWeek, exerciseId));
+        editingExercises.Remove((label, exerciseId));
     }
 
-    private IEnumerable<Exercise> GetExercisesForDay(DayOfWeek dayOfWeek)
+    private IEnumerable<Exercise> GetExercisesForDay(string label)
     {
-        if (selectedMuscleGroup.TryGetValue(dayOfWeek, out var mg) && mg != null)
+        if (selectedMuscleGroup.TryGetValue(label, out var mg) && mg != null)
         {
             return allExercises.Where(ex => ex.ExerciseMuscleGroups.Any(emg => emg.MuscleGroup.Name == mg.ToString()));
         }
@@ -218,13 +227,29 @@
         StateHasChanged();
     }
 
-    private void OnDayOfWeekChanged(WorkoutDay day, object? value)
+    private void OnLabelChanged(WorkoutDay day, object? value)
     {
         if (value is null) return;
-        if (!Enum.TryParse<DayOfWeek>(value.ToString(), out var newDayOfWeek)) return;
-        if (workout.Days.Any(d => d != day && d.DayOfWeek == newDayOfWeek)) return;
-        day.DayOfWeek = newDayOfWeek;
+        day.Label = value.ToString() ?? string.Empty;
         StateHasChanged();
+    }
+
+    private void ChangeWeek(int delta)
+    {
+        currentWeek += delta;
+        if (currentWeek < 1)
+            currentWeek = 1;
+        if (currentWeek > MaxWeek)
+            currentWeek = MaxWeek;
+    }
+
+    private void ReorderDays()
+    {
+        int order = 1;
+        foreach (var day in workout.Days.OrderBy(d => d.OrderNumber))
+        {
+            day.OrderNumber = order++;
+        }
     }
 
     private async Task HandleValidSubmit()
@@ -245,11 +270,12 @@
             };
 
             int dayNumber = 1;
-            foreach (var wDay in workout.Days.OrderBy(d => d.DayOfWeek))
+            foreach (var wDay in workout.Days.OrderBy(d => d.OrderNumber))
             {
+                var dow = Enum.TryParse<DayOfWeek>(wDay.Label, out var parsed) ? parsed : DayOfWeek.Sunday;
                 var tDay = new WorkoutTemplateDay
                 {
-                    DayOfWeek = wDay.DayOfWeek,
+                    DayOfWeek = dow,
                     DayNumber = dayNumber++,
                 };
 
@@ -291,23 +317,22 @@
                 .FirstOrDefaultAsync(t => t.Id == workout.WorkoutTemplateId.Value);
         }
 
-        var startDate = workout.StartDate ?? DateTime.Today;
-
         for (int i = 0; i < 7; i++)
         {
-            var dow = startDate.AddDays(i).DayOfWeek;
             var wDay = new WorkoutDay
             {
                 WorkoutId = workout.Id,
-                DayOfWeek = dow,
-                Name = dow.ToString()
+                Label = $"Day {i + 1}",
+                WeekNumber = 1,
+                OrderNumber = i + 1,
+                Name = $"Day {i + 1}"
             };
             Db.WorkoutDays.Add(wDay);
             await Db.SaveChangesAsync();
 
             if (template != null)
             {
-                var tDay = template.Days.FirstOrDefault(d => d.DayOfWeek == dow);
+                var tDay = template.Days.FirstOrDefault(d => d.DayNumber == i + 1);
                 if (tDay != null)
                 {
                     foreach (var tEx in tDay.Exercises.OrderBy(e => e.OrderInDay))

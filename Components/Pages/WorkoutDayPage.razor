@@ -60,8 +60,11 @@
 
         if (workout != null)
         {
-            var dow = DateTime.Today.DayOfWeek;
-            workoutDay = workout.Days.FirstOrDefault(d => d.DayOfWeek == dow);
+            var currentWeek = GetCurrentWeek(workout);
+            workoutDay = workout.Days
+                .Where(d => d.WeekNumber == currentWeek && !d.IsCompleted)
+                .OrderBy(d => d.OrderNumber)
+                .FirstOrDefault();
             if (workoutDay != null)
             {
                 foreach (var ex in workoutDay.Exercises.OrderBy(e => e.OrderInDay))
@@ -80,6 +83,13 @@
         }
 
         isLoading = false;
+    }
+
+    private static int GetCurrentWeek(Workout workout)
+    {
+        var start = workout.StartDate ?? DateTime.Today;
+        var diff = (DateTime.Today - start).Days;
+        return diff / 7 + 1;
     }
 
     private async Task SaveAsync()

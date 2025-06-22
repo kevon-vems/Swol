@@ -66,6 +66,12 @@ public class ApplicationDbContext : DbContext
             .HasOne(wd => wd.Workout)
             .WithMany(w => w.Days)
             .HasForeignKey(wd => wd.WorkoutId);
+        modelBuilder.Entity<WorkoutDay>()
+            .Property(wd => wd.Label)
+            .IsRequired();
+        modelBuilder.Entity<WorkoutDay>()
+            .Property(wd => wd.OrderNumber)
+            .IsRequired();
 
         // WorkoutDay -> Exercises
         modelBuilder.Entity<WorkoutDayExercise>()

@@ -10,5 +10,6 @@ public class WorkoutDayExercise
     public int OrderInDay { get; set; }
     public int ExerciseId { get; set; }
     public Exercise Exercise { get; set; } = null!;
+    public bool IsCompleted { get; set; }
     public ICollection<WorkoutDayExerciseSet> Sets { get; set; } = new List<WorkoutDayExerciseSet>();
 }

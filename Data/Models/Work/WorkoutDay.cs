@@ -5,6 +5,7 @@ public class WorkoutDay
     public int Id { get; set; }
     public int WorkoutId { get; set; }
     public Workout Workout { get; set; } = null!;
+    public DayOfWeek DayOfWeek { get; set; }
     public string Label { get; set; } = string.Empty;
     public int WeekNumber { get; set; } = 1;
     public int OrderNumber { get; set; }

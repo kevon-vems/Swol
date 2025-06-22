@@ -27,6 +27,17 @@ public partial class Home : ComponentBase
         if (activeTemplate == null)
             return;
 
+        var existingWorkout = await Db.Workouts
+            .FirstOrDefaultAsync(w =>
+                w.WorkoutTemplateId == activeTemplate.Id &&
+                w.StartDate == DateTime.Today);
+
+        if (existingWorkout != null)
+        {
+            Nav.NavigateTo($"/workouts/{existingWorkout.Id}");
+            return;
+        }
+
         var workout = new Workout
         {
             Name = $"{activeTemplate.Name} - {DateTime.Today:yyyy-MM-dd}",
